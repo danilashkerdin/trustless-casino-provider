@@ -2,446 +2,757 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trustless Casino — Slot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Trustless Casino</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f1a;
+      background: #0a0a1a;
       color: #e0e0e0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding-bottom: 80px;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1a3e 0%, #0a0a1a 100%);
       padding: 16px;
-    }
-    .container {
-      max-width: 380px;
-      width: 100%;
-    }
-    h1 {
       text-align: center;
-      font-size: 20px;
-      margin: 16px 0;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .header h1 {
+      font-size: 18px;
       background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .slot-machine {
-      background: #1a1a2e;
+    .header .sub { font-size: 11px; color: #666; margin-top: 4px; }
+    .nav {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      background: #0f0f2a;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid #1a1a3a;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      flex: 1 0 auto;
+      padding: 8px 12px;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      background: transparent;
+      color: #888;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-color: transparent;
+    }
+    .game-panel { display: none; padding: 12px; max-width: 400px; margin: 0 auto; }
+    .game-panel.active { display: block; }
+    .card {
+      background: #12122a;
       border-radius: 16px;
       padding: 20px;
-      margin-bottom: 16px;
-      border: 1px solid #2a2a4a;
+      border: 1px solid #1e1e3e;
+      margin-bottom: 12px;
     }
-    .reels {
+    .card h2 { font-size: 16px; margin-bottom: 16px; text-align: center; }
+    .flex-row { display: flex; gap: 8px; align-items: center; }
+    .flex-row .grow { flex: 1; }
+    label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+    input, select {
+      width: 100%;
+      background: #0a0a1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+    }
+    input:focus { border-color: #667eea; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .btn-success { background: linear-gradient(135deg, #4ade80, #22c55e); color: #0a0a1a; }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+    .result-box {
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+    }
+    .result-box.win { display: block; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; }
+    .result-box.lose { display: block; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
+    .result-box.info { display: block; background: rgba(102,126,234,0.1); border: 1px solid rgba(102,126,234,0.3); color: #667eea; }
+    .balance-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #0f0f2a;
+      border-bottom: 1px solid #1a1a3a;
+      font-size: 12px;
+      color: #888;
+    }
+    .balance-bar .amount { color: #4ade80; font-family: monospace; }
+
+    /* Roulette */
+    .roulette-wheel {
+      width: 200px; height: 200px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      border: 3px solid #2a2a4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      position: relative;
+      overflow: hidden;
+    }
+    .roulette-wheel.spinning { animation: rouletteSpin 3s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
+    @keyframes rouletteSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(1440deg); }
+    }
+    .roulette-numbers {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-top: 12px;
+    }
+    .roulette-numbers .num {
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .roulette-numbers .num.selected { border-color: #667eea; box-shadow: 0 0 8px rgba(102,126,234,0.3); }
+    .roulette-numbers .num.red { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .roulette-numbers .num.black { background: rgba(0,0,0,0.3); color: #ddd; }
+    .roulette-numbers .num.green { background: rgba(74,222,128,0.2); color: #4ade80; }
+    .bet-options { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .bet-options .opt {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .bet-options .opt.active { border-color: #667eea; color: white; background: rgba(102,126,234,0.15); }
+
+    /* Dice */
+    .dice-display {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .reel {
-      width: 80px;
-      height: 80px;
-      background: #0f0f1a;
+    .dice {
+      width: 64px; height: 64px;
+      background: #1a1a3e;
       border: 2px solid #2a2a4a;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
-      transition: all 0.1s;
+      font-size: 32px;
+      transition: all 0.2s;
     }
-    .reel.spinning {
-      animation: spin 0.1s linear infinite;
+    .dice.roll { animation: diceShake 0.5s ease; }
+    @keyframes diceShake {
+      0%,100% { transform: rotate(0deg); }
+      25% { transform: rotate(15deg); }
+      75% { transform: rotate(-15deg); }
     }
-    @keyframes spin {
-      0% { transform: rotateX(0deg); }
-      100% { transform: rotateX(360deg); }
+    .dice-guess {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
     }
-    .reel.win {
-      border-color: #4ade80;
-      box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-    }
-    .reel.lose {
-      border-color: #ef4444;
-    }
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .bet-control {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0f0f1a;
-      padding: 8px 16px;
+    .dice-guess .g {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #2a2a4a;
       border-radius: 8px;
-    }
-    .bet-control label { font-size: 14px; color: #888; }
-    .bet-control input {
       background: transparent;
-      border: none;
-      color: #e0e0e0;
-      font-size: 16px;
-      width: 80px;
-      text-align: right;
-      font-family: monospace;
-    }
-    button {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 600;
+      color: #888;
+      font-size: 18px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    button:active { transform: scale(0.97); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .result {
+    .dice-guess .g.active { border-color: #667eea; background: rgba(102,126,234,0.15); color: white; }
+    .dice-guess .g.win { border-color: #4ade80; background: rgba(74,222,128,0.15); color: #4ade80; }
+    .dice-guess .g.lose { border-color: #ef4444; background: rgba(239,68,68,0.15); color: #ef4444; }
+
+    /* Crash */
+    .crash-canvas {
+      width: 100%;
+      height: 250px;
+      background: #0a0a1a;
+      border-radius: 12px;
+      border: 1px solid #1e1e3e;
+      margin-bottom: 12px;
+    }
+    .crash-multiplier {
       text-align: center;
-      padding: 12px;
+      font-size: 42px;
+      font-weight: 900;
+      font-family: monospace;
+      padding: 16px;
+    }
+    .crash-multiplier.crashed { color: #ef4444; }
+    .crash-multiplier.running { color: #4ade80; }
+
+    /* Mines */
+    .mines-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .mines-grid .cell {
+      aspect-ratio: 1;
+      background: #1a1a3e;
+      border: 1px solid #2a2a4a;
       border-radius: 8px;
-      margin-top: 12px;
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .result.win {
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.3);
-      color: #4ade80;
-    }
-    .result.lose {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-    }
-    .status {
-      font-size: 12px;
-      color: #666;
-      text-align: center;
-      margin-top: 8px;
-    }
+    .mines-grid .cell:hover { border-color: #4a4a6a; }
+    .mines-grid .cell.revealed { cursor: default; }
+    .mines-grid .cell.gem { background: rgba(74,222,128,0.15); border-color: #4ade80; }
+    .mines-grid .cell.bomb { background: rgba(239,68,68,0.15); border-color: #ef4444; }
+
+    .stats { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+    .stats .stat { flex: 1; text-align: center; padding: 8px; background: #0a0a1a; border-radius: 8px; }
+    .stats .stat .val { font-size: 18px; font-weight: 700; font-family: monospace; }
+    .stats .stat .lbl { font-size: 10px; color: #666; }
     .verify-section {
-      background: #1a1a2e;
+      background: #12122a;
       border-radius: 16px;
       padding: 16px;
-      border: 1px solid #2a2a4a;
+      border: 1px solid #1e1e3e;
+      margin-top: 12px;
     }
-    .verify-section h3 {
-      font-size: 14px;
-      margin-bottom: 12px;
-      color: #888;
-    }
-    .verify-data {
-      font-family: monospace;
-      font-size: 10px;
-      word-break: break-all;
-      background: #0f0f1a;
-      padding: 8px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .verify-data div { margin-bottom: 4px; }
-    .verify-data .label { color: #666; }
-    .verify-data .value { color: #4ade80; }
-    .verify-btn {
-      background: transparent;
-      border: 1px solid #4ade80;
-      color: #4ade80;
-      width: 100%;
-    }
-    .verify-btn:hover {
-      background: rgba(74, 222, 128, 0.1);
-    }
-    .verify-result {
-      margin-top: 8px;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      text-align: center;
-    }
-    .verify-result.pass {
-      background: rgba(74, 222, 128, 0.1);
-      color: #4ade80;
-    }
-    .verify-result.fail {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-    }
+    .verify-section h3 { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .verify-data { font-family: monospace; font-size: 9px; word-break: break-all; color: #666; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎰 TRUSTLESS SLOT</h1>
-    
-    <div class="slot-machine">
-      <div class="reels">
-        <div class="reel" id="reel1">🍒</div>
-        <div class="reel" id="reel2">🍒</div>
-        <div class="reel" id="reel3">🍒</div>
-      </div>
+  <div class="header">
+    <h1>TRUSTLESS CASINO</h1>
+    <div class="sub">Provably Fair • On-Chain • Open Source</div>
+  </div>
+  <div class="balance-bar">
+    <span>Balance</span>
+    <span class="amount" id="balanceDisplay">0.00 TON</span>
+  </div>
 
-      <div class="controls">
-        <div class="bet-control">
-          <label>Bet (TON)</label>
-          <input type="number" id="betInput" value="0.1" min="0.01" step="0.01">
-        </div>
-        <button id="spinBtn">SPIN</button>
-        <div id="resultDisplay" class="result" style="display:none"></div>
-        <div class="status" id="statusDisplay">Ready. Server seed committed.</div>
+  <div class="nav" id="nav">
+    <button class="nav-btn active" data-game="slots">🎰 Slots</button>
+    <button class="nav-btn" data-game="roulette">🎡 Roulette</button>
+    <button class="nav-btn" data-game="dice">🎲 Dice</button>
+    <button class="nav-btn" data-game="crash">📈 Crash</button>
+    <button class="nav-btn" data-game="mines">💣 Mines</button>
+  </div>
+
+  <!-- ===== SLOTS ===== -->
+  <div class="game-panel active" id="game-slots">
+    <div class="card">
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px">
+        <div class="reel-box" id="sReel1" style="width:72px;height:72px;background:#0a0a1a;border:2px solid #2a2a4a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px">🍒</div>
+        <div class="reel-box" id="sReel2" style="width:72px;height:72px;background:#0a0a1a;border:2px solid #2a2a4a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px">🍒</div>
+        <div class="reel-box" id="sReel3" style="width:72px;height:72px;background:#0a0a1a;border:2px solid #2a2a4a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px">🍒</div>
       </div>
+      <div style="margin-bottom:12px">
+        <label>Bet (TON)</label>
+        <input type="number" id="sBet" value="0.1" min="0.01" step="0.01">
+      </div>
+      <button class="btn btn-primary" id="sSpin">SPIN</button>
+      <div id="sResult" class="result-box"></div>
     </div>
-
     <div class="verify-section">
-      <h3>🔍 Provably Fair Verification</h3>
-      <div class="verify-data" id="verifyData">
-        <div><span class="label">Server Seed Hash:</span></div>
-        <div style="color:#888;font-size:10px" id="seedHashDisplay">—</div>
-        <div style="margin-top:8px"><span class="label">Client Seed:</span></div>
-        <div style="color:#888;font-size:10px" id="clientSeedDisplay">—</div>
+      <h3>🔍 Provably Fair — Slots</h3>
+      <div class="verify-data" id="sVerify">Spin to play</div>
+      <button class="btn" id="sVerifyBtn" disabled style="margin-top:8px;background:transparent;border:1px solid #4ade80;color:#4ade80">Verify</button>
+      <div id="sVerifyResult" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- ===== ROULETTE ===== -->
+  <div class="game-panel" id="game-roulette">
+    <div class="card">
+      <div class="roulette-wheel" id="wheel">🎯</div>
+      <div class="flex-row" style="margin-bottom:8px">
+        <div class="grow"><label>Bet (TON)</label><input type="number" id="rBet" value="0.1" min="0.01" step="0.01"></div>
+        <div style="width:100px"><label>Payout</label><div style="padding:10px 12px;font-size:14px;font-family:monospace;color:#4ade80" id="rPayout">36x</div></div>
       </div>
-      <button class="verify-btn" id="verifyBtn" disabled>Verify Last Game</button>
-      <div id="verifyResult" style="display:none"></div>
+      <label>Bet Type</label>
+      <div class="bet-options" id="rBetType">
+        <div class="opt active" data-type="number" data-value="-1">Number</div>
+        <div class="opt" data-type="color" data-value="red">Red 2x</div>
+        <div class="opt" data-type="color" data-value="black">Black 2x</div>
+        <div class="opt" data-type="parity" data-value="even">Even 2x</div>
+        <div class="opt" data-type="parity" data-value="odd">Odd 2x</div>
+        <div class="opt" data-type="range" data-value="1-18">1-18 2x</div>
+        <div class="opt" data-type="range" data-value="19-36">19-36 2x</div>
+      </div>
+      <div id="rNumberPicker" style="margin-top:8px">
+        <label>Pick Number</label>
+        <div class="roulette-numbers" id="rNumbers"></div>
+      </div>
+      <button class="btn btn-primary" id="rSpin" style="margin-top:12px">SPIN</button>
+      <div id="rResult" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- ===== DICE ===== -->
+  <div class="game-panel" id="game-dice">
+    <div class="card">
+      <div class="dice-display">
+        <div class="dice" id="dice1">🎲</div>
+        <div class="dice" id="dice2">🎲</div>
+      </div>
+      <div class="flex-row" style="margin-bottom:12px">
+        <div class="grow"><label>Bet (TON)</label><input type="number" id="dBet" value="0.1" min="0.01" step="0.01"></div>
+        <div style="width:100px"><label>Payout</label><div style="padding:10px 12px;font-size:14px;font-family:monospace;color:#4ade80" id="dPayout">6x</div></div>
+      </div>
+      <label>Guess (pick dice sum)</label>
+      <div class="dice-guess" id="diceGuess">
+        <div class="g" data-val="2">2</div>
+        <div class="g" data-val="3">3</div>
+        <div class="g" data-val="4">4</div>
+        <div class="g" data-val="5">5</div>
+        <div class="g" data-val="6">6</div>
+        <div class="g" data-val="7">7</div>
+        <div class="g" data-val="8">8</div>
+        <div class="g" data-val="9">9</div>
+        <div class="g" data-val="10">10</div>
+        <div class="g" data-val="11">11</div>
+        <div class="g" data-val="12">12</div>
+      </div>
+      <button class="btn btn-primary" id="dRoll" style="margin-top:12px">ROLL</button>
+      <div id="dResult" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- ===== CRASH ===== -->
+  <div class="game-panel" id="game-crash">
+    <div class="card">
+      <canvas class="crash-canvas" id="crashCanvas"></canvas>
+      <div class="crash-multiplier" id="crashMulti">1.00x</div>
+      <div class="flex-row" style="margin-bottom:12px">
+        <div class="grow"><label>Bet (TON)</label><input type="number" id="cBet" value="0.1" min="0.01" step="0.01"></div>
+        <div class="grow"><label>Auto Cashout</label><input type="number" id="cCashout" value="2.0" min="1.01" step="0.1"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success" id="cBetBtn">BET</button>
+        <button class="btn btn-danger" id="cCashoutBtn" disabled>CASHOUT</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="val" id="cLast">—</div><div class="lbl">Last</div></div>
+        <div class="stat"><div class="val" id="cGames">0</div><div class="lbl">Games</div></div>
+      </div>
+      <div id="cResult" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- ===== MINES ===== -->
+  <div class="game-panel" id="game-mines">
+    <div class="card">
+      <div class="flex-row" style="margin-bottom:12px">
+        <div class="grow"><label>Bet (TON)</label><input type="number" id="mBet" value="0.1" min="0.01" step="0.01"></div>
+        <div style="width:80px"><label>Mines</label><input type="number" id="mMines" value="3" min="1" max="24"></div>
+      </div>
+      <div class="mines-grid" id="minesGrid"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success" id="mStart">START</button>
+        <button class="btn btn-danger" id="mCashout" disabled>CASHOUT</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="val" id="mMulti">1.00x</div><div class="lbl">Multiplier</div></div>
+        <div class="stat"><div class="val" id="mRevealed">0</div><div class="lbl">Revealed</div></div>
+      </div>
+      <div id="mResult" class="result-box"></div>
     </div>
   </div>
 
   <script>
-    const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣'];
-    const SYM_NAMES = ['cherry', 'lemon', 'orange', 'grape', 'diamond', 'seven'];
-    const MULTIPLIERS = {
-      'cherry_cherry_cherry': 40,
-      'lemon_lemon_lemon': 30,
-      'orange_orange_orange': 20,
-      'grape_grape_grape': 15,
-      'diamond_diamond_diamond': 10,
-      'seven_seven_seven': 50,
-      'cherry_cherry_*': 5,
-      'lemon_lemon_*': 4,
-      'orange_orange_*': 3,
-      'diamond_*_*': 2,
-    };
-
-    let gameState = {
-      gameId: null,
-      serverSeedHash: null,
-      serverSeed: null,
-      clientSeed: null,
-      nonce: null,
-      result: null,
-      spinning: false,
-    };
-
-    const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
-    const spinBtn = document.getElementById('spinBtn');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const resultDisplay = document.getElementById('resultDisplay');
-    const statusDisplay = document.getElementById('statusDisplay');
-    const seedHashDisplay = document.getElementById('seedHashDisplay');
-    const clientSeedDisplay = document.getElementById('clientSeedDisplay');
-    const verifyResult = document.getElementById('verifyResult');
-
-    // Simple SHA256 implementation for browser
+    // ===== UTILITY =====
+    function $(id) { return document.getElementById(id); }
     async function sha256(data) {
       const buf = new TextEncoder().encode(data);
       const hash = await crypto.subtle.digest('SHA-256', buf);
       return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
-
+    function randomHex(len) {
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
     function hexToBytes(hex) {
-      const bytes = [];
-      for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
+      const bytes = []; for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
       return new Uint8Array(bytes);
     }
-
     async function sha256Buffer(buffer) {
       const hash = await crypto.subtle.digest('SHA-256', buffer);
       return new Uint8Array(hash);
     }
-
-    function bytesToHex(bytes) {
-      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function randomHex(len) {
-      const bytes = new Uint8Array(len);
-      crypto.getRandomValues(bytes);
-      return bytesToHex(bytes);
-    }
-
-    async function calculateGameResult(serverSeed, clientSeed, nonce) {
-      const enc = new TextEncoder();
+    function bytesToHex(bytes) { return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(''); }
+    async function computeOutcome(serverSeed, clientSeed, nonce) {
       const nonceBuf = new ArrayBuffer(8);
-      const dv = new DataView(nonceBuf);
-      dv.setBigUint64(0, BigInt(nonce));
-      
-      const data = new Uint8Array([
-        ...hexToBytes(serverSeed),
-        ...hexToBytes(clientSeed),
-        ...new Uint8Array(nonceBuf)
-      ]);
-      
+      new DataView(nonceBuf).setBigUint64(0, BigInt(nonce));
+      const data = new Uint8Array([...hexToBytes(serverSeed), ...hexToBytes(clientSeed), ...new Uint8Array(nonceBuf)]);
       const hash = await sha256Buffer(data);
       const val = BigInt('0x' + bytesToHex(hash.slice(0, 8)));
       return Number(val % BigInt(10000));
     }
+    function showResult(el, type, msg) { el.className = 'result-box ' + type; el.innerHTML = msg; el.style.display = 'block'; }
+    function hideResult(el) { el.style.display = 'none'; }
 
-    function outcomeToSymbols(outcome) {
-      const idx1 = outcome % SYMBOLS.length;
-      const idx2 = (Math.floor(outcome / SYMBOLS.length) + idx1) % SYMBOLS.length;
-      const idx3 = (Math.floor(outcome / (SYMBOLS.length * SYMBOLS.length)) + idx2) % SYMBOLS.length;
-      return [idx1, idx2, idx3];
-    }
+    // ===== NAV =====
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        $('game-' + btn.dataset.game).classList.add('active');
+      });
+    });
 
-    function getWinMultiplier(indices) {
+    // ===== SLOTS =====
+    const SYMBOLS = ['🍒','🍋','🍊','🍇','💎','7️⃣'];
+    const SYM_NAMES = ['cherry','lemon','orange','grape','diamond','seven'];
+    const S_MULT = { 'cherry_cherry_cherry':40,'lemon_lemon_lemon':30,'orange_orange_orange':20,'grape_grape_grape':15,'diamond_diamond_diamond':10,'seven_seven_seven':50};
+    function sGetMultiplier(indices) {
       const names = indices.map(i => SYM_NAMES[i]);
       const key = names.join('_');
-      
-      if (MULTIPLIERS[key]) return MULTIPLIERS[key];
-      
-      // Two of a kind
-      if (names[0] === names[1]) return MULTIPLIERS[`${names[0]}_${names[0]}_*`] || 0;
-      if (names[0] === names[2]) return MULTIPLIERS[`${names[0]}_*_*`] || 0;
-      if (names[1] === names[2]) return 2;
-      
-      // Diamond anywhere
-      if (names[0] === 'diamond') return MULTIPLIERS['diamond_*_*'] || 0;
-      
+      if (S_MULT[key]) return S_MULT[key];
+      if (names[0]===names[1]) return names[0]==='cherry'?5:names[0]==='lemon'?4:3;
+      if (names[0]==='diamond') return 2;
       return 0;
     }
-
-    async function spin() {
-      if (gameState.spinning) return;
-      gameState.spinning = true;
-      spinBtn.disabled = true;
-      resultDisplay.style.display = 'none';
-
-      const betAmount = parseFloat(document.getElementById('betInput').value);
-      if (betAmount <= 0) { alert('Bet must be > 0'); return; }
-
-      // 1. Provider generates server seed, commits hash
-      const serverSeed = randomHex(32);
-      const serverSeedHash = await sha256(serverSeed);
-      const gameId = 'slot-' + Date.now();
-      const nonce = Math.floor(Math.random() * 1000000);
-      const clientSeed = randomHex(32);
-
-      statusDisplay.textContent = '🔮 Game committed... Spinning...';
-
-      // Show hash before reveal
-      seedHashDisplay.textContent = serverSeedHash;
-      clientSeedDisplay.textContent = clientSeed;
-
-      // 2. Calculate result
-      const outcome = await calculateGameResult(serverSeed, clientSeed, nonce);
-      const indices = outcomeToSymbols(outcome);
-      const multiplier = getWinMultiplier(indices);
-      const payout = multiplier > 0 ? betAmount * multiplier : 0;
-
-      // 3. Animate reels
-      for (let i = 0; i < reels.length; i++) {
-        reels[i].classList.add('spinning');
-      }
-
-      let counter = 0;
-      const spinInterval = setInterval(() => {
-        for (let i = 0; i < reels.length; i++) {
-          reels[i].textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-        }
-        counter++;
-        if (counter > 15) {
-          clearInterval(spinInterval);
-          // Show final result
-          for (let i = 0; i < reels.length; i++) {
-            reels[i].classList.remove('spinning');
-            reels[i].textContent = SYMBOLS[indices[i]];
-          }
-
-          gameState.gameId = gameId;
-          gameState.serverSeedHash = serverSeedHash;
-          gameState.serverSeed = serverSeed;
-          gameState.clientSeed = clientSeed;
-          gameState.nonce = nonce;
-          gameState.result = { outcome, indices, multiplier, payout, bet: betAmount };
-
-          if (payout > 0) {
-            for (const r of reels) r.classList.add('win');
-            resultDisplay.className = 'result win';
-            resultDisplay.textContent = `🎉 WIN! ${multiplier}x = ${payout.toFixed(2)} TON`;
-          } else {
-            for (const r of reels) r.classList.add('lose');
-            resultDisplay.className = 'result lose';
-            resultDisplay.textContent = `😢 Lost ${betAmount.toFixed(2)} TON`;
-          }
-          resultDisplay.style.display = 'block';
-
-          statusDisplay.textContent = '✅ Game resolved. Click Verify to check fairness.';
-          verifyBtn.disabled = false;
-          gameState.spinning = false;
-          spinBtn.disabled = false;
-          
-          setTimeout(() => {
-            for (const r of reels) r.classList.remove('win', 'lose');
-          }, 2000);
-        }
-      }, 80);
+    function sOutcomeToSymbols(o) {
+      return [o%6, (Math.floor(o/6)+o)%6, (Math.floor(o/36)+o)%6];
     }
+    let sState = { serverSeed:null, serverSeedHash:null, clientSeed:null, nonce:null, result:null };
+    $('sSpin').addEventListener('click', async () => {
+      const bet = parseFloat($('sBet').value);
+      if (!bet||bet<=0) return;
+      hideResult($('sResult'));
+      $('sSpin').disabled = true;
+      const serverSeed = randomHex(32), serverSeedHash = await sha256(serverSeed);
+      const clientSeed = randomHex(32), nonce = Math.floor(Math.random()*1000000);
+      const outcome = await computeOutcome(serverSeed, clientSeed, nonce);
+      const indices = sOutcomeToSymbols(outcome);
+      const mult = sGetMultiplier(indices);
+      const payout = mult > 0 ? bet * mult : 0;
+      const reels = [$('sReel1'),$('sReel2'),$('sReel3')];
+      let c = 0;
+      const iv = setInterval(() => { reels.forEach(r => r.textContent = SYMBOLS[Math.floor(Math.random()*6)]); c++; if(c>15) { clearInterval(iv);
+        reels.forEach((r,i) => r.textContent = SYMBOLS[indices[i]]);
+        sState = {serverSeed,serverSeedHash,clientSeed,nonce,result:{outcome,indices,mult,payout,bet}};
+        $('sVerifyBtn').disabled = false;
+        $('sVerify').innerHTML = `Server Hash: ${serverSeedHash.slice(0,16)}...<br>Client: ${clientSeed.slice(0,16)}...`;
+        if (payout>0) showResult($('sResult'),'win',`🎉 WIN ${mult}x = ${payout.toFixed(2)} TON`);
+        else showResult($('sResult'),'lose',`😢 Lost ${bet.toFixed(2)} TON`);
+        $('sSpin').disabled = false;
+      }}, 80);
+    });
+    $('sVerifyBtn').addEventListener('click', async () => {
+      if (!sState.serverSeed) return;
+      const s = sState;
+      const hashOk = (await sha256(s.serverSeed)) === s.serverSeedHash;
+      const outcomeOk = (await computeOutcome(s.serverSeed, s.clientSeed, s.nonce)) === s.result.outcome;
+      const el = $('sVerifyResult');
+      if (hashOk&&outcomeOk) showResult(el,'win','✅ GAME IS FAIR');
+      else showResult(el,'lose','❌ CHEATING DETECTED — can slash!');
+    });
 
-    async function verifyGame() {
-      if (!gameState.serverSeed) {
-        verifyResult.style.display = 'block';
-        verifyResult.className = 'verify-result fail';
-        verifyResult.textContent = '❌ No game to verify. Spin first!';
-        return;
+    // ===== ROULETTE =====
+    const R_NUMBERS = [];
+    for (let i=0; i<=36; i++) {
+      let color = 'green';
+      if (i>=1&&i<=10||i>=19&&i<=28) color = i%2===0?'black':'red';
+      else if (i>=11&&i<=18||i>=29&&i<=36) color = i%2===0?'red':'black';
+      R_NUMBERS.push({n:i,color});
+    }
+    (function initRoulette() {
+      const grid = $('rNumbers');
+      R_NUMBERS.forEach(({n,color}) => {
+        const d = document.createElement('div');
+        d.className = 'num ' + color;
+        d.textContent = n;
+        d.dataset.n = n;
+        d.addEventListener('click', () => {
+          grid.querySelectorAll('.num').forEach(x => x.classList.remove('selected'));
+          d.classList.add('selected');
+          document.querySelector('[data-type="number"]').click();
+        });
+        grid.appendChild(d);
+      });
+    })();
+    document.querySelectorAll('#rBetType .opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#rBetType .opt').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        $('rNumberPicker').style.display = opt.dataset.type === 'number' ? 'block' : 'none';
+        const payout = opt.dataset.type === 'number' ? '36x' : '2x';
+        $('rPayout').textContent = payout;
+      });
+    });
+    $('rSpin').addEventListener('click', async () => {
+      const bet = parseFloat($('rBet').value);
+      if (!bet||bet<=0) return;
+      hideResult($('rResult'));
+      $('rSpin').disabled = true;
+      const wheel = $('wheel');
+      wheel.classList.remove('spinning');
+      void wheel.offsetWidth;
+      wheel.classList.add('spinning');
+      const outcome = Math.floor(Math.random()*37);
+      const active = document.querySelector('#rBetType .opt.active');
+      const type = active.dataset.type, value = active.dataset.value;
+      let selectedNum = -1;
+      if (type === 'number') {
+        const sel = document.querySelector('#rNumbers .num.selected');
+        selectedNum = sel ? parseInt(sel.dataset.n) : -1;
       }
+      let win = false;
+      let mult = 0;
+      const numInfo = R_NUMBERS[outcome];
+      if (type === 'number' && selectedNum === outcome) { win=true; mult=36; }
+      else if (type === 'color' && numInfo.color === value) { win=true; mult=2; }
+      else if (type === 'parity' && outcome>0) {
+        if (value==='even'&&outcome%2===0) { win=true; mult=2; }
+        if (value==='odd'&&outcome%2===1) { win=true; mult=2; }
+      }
+      else if (type === 'range') {
+        if (value==='1-18'&&outcome>=1&&outcome<=18) { win=true; mult=2; }
+        if (value==='19-36'&&outcome>=19&&outcome<=36) { win=true; mult=2; }
+      }
+      setTimeout(() => {
+        wheel.classList.remove('spinning');
+        wheel.textContent = outcome === 0 ? '0' : ['🔴','⚫'][numInfo.color==='red'?0:1] + outcome;
+        const payout = win ? bet * mult : 0;
+        if (win) showResult($('rResult'),'win',`🎉 ${outcome} — WIN ${mult}x = ${payout.toFixed(2)} TON`);
+        else showResult($('rResult'),'lose',`😢 ${outcome} — Lost ${bet.toFixed(2)} TON`);
+        $('rSpin').disabled = false;
+      }, 3200);
+    });
 
-      const { serverSeed, serverSeedHash, clientSeed, nonce, result } = gameState;
-      
-      // Verify 1: SHA256(serverSeed) === serverSeedHash
-      const computedHash = await sha256(serverSeed);
-      const seedMatch = computedHash === serverSeedHash;
+    // ===== DICE =====
+    let dSelected = null;
+    document.querySelectorAll('#diceGuess .g').forEach(g => {
+      g.addEventListener('click', () => {
+        document.querySelectorAll('#diceGuess .g').forEach(x => x.classList.remove('active'));
+        g.classList.add('active'); dSelected = parseInt(g.dataset.val);
+        const prob = ({2:1,3:2,4:3,5:4,6:5,7:6,8:5,9:4,10:3,11:2,12:1})[dSelected]||0;
+        $('dPayout').textContent = (36/prob).toFixed(1)+'x';
+      });
+    });
+    $('dRoll').addEventListener('click', async () => {
+      if (!dSelected) { showResult($('dResult'),'info','Pick a number first'); return; }
+      const bet = parseFloat($('dBet').value);
+      if (!bet||bet<=0) return;
+      hideResult($('dResult'));
+      $('dRoll').disabled = true;
+      document.querySelectorAll('#diceGuess .g').forEach(x => x.classList.remove('win','lose'));
+      const d1 = $('dice1'), d2 = $('dice2');
+      d1.classList.add('roll'); d2.classList.add('roll');
+      const serverSeed = randomHex(32), serverSeedHash = await sha256(serverSeed);
+      const clientSeed = randomHex(32), nonce = Math.floor(Math.random()*1000000);
+      const outcome = await computeOutcome(serverSeed, clientSeed, nonce);
+      const roll1 = (outcome % 6) + 1, roll2 = (Math.floor(outcome/6) % 6) + 1;
+      const sum = roll1 + roll2;
+      setTimeout(() => {
+        d1.classList.remove('roll'); d2.classList.remove('roll');
+        const faces = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+        d1.textContent = faces[roll1]; d2.textContent = faces[roll2];
+        const prob = ({2:1,3:2,4:3,5:4,6:5,7:6,8:5,9:4,10:3,11:2,12:1})[dSelected]||0;
+        const mult = 36/prob;
+        const win = sum === dSelected;
+        const gEl = document.querySelector(`#diceGuess .g[data-val="${sum}"]`);
+        if (gEl) gEl.classList.add(win?'win':'lose');
+        if (win) showResult($('dResult'),'win',`🎉 ${roll1}+${roll2}=${sum} — WIN ${mult.toFixed(1)}x = ${(bet*mult).toFixed(2)} TON`);
+        else showResult($('dResult'),'lose',`😢 ${roll1}+${roll2}=${sum} — Lost ${bet.toFixed(2)} TON`);
+        $('dRoll').disabled = false;
+      }, 600);
+    });
 
-      // Verify 2: outcome === F(serverSeed, clientSeed, nonce)
-      const computedOutcome = await calculateGameResult(serverSeed, clientSeed, nonce);
-      const outcomeMatch = computedOutcome === result.outcome;
+    // ===== CRASH =====
+    const crashCanvas = $('crashCanvas'), ctx = crashCanvas.getContext('2d');
+    let crashRunning = false, crashBetted = false;
+    function resizeCrash() { crashCanvas.width = crashCanvas.offsetWidth; crashCanvas.height = crashCanvas.offsetHeight; }
+    window.addEventListener('resize', resizeCrash);
+    function drawCrash(points, crashPoint) {
+      resizeCrash();
+      const w = crashCanvas.width, h = crashCanvas.height;
+      ctx.clearRect(0,0,w,h);
+      if (points.length < 2) return;
+      ctx.beginPath(); ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 3;
+      const maxX = points.length-1, maxY = Math.max(...points.map(p=>p.y), crashPoint||2);
+      points.forEach((p,i) => {
+        const x = (i/maxX)*w, y = h - (p.y/maxY)*h;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+      if (crashPoint) {
+        const x = (points.length-1/maxX)*w, y = h - (crashPoint/maxY)*h;
+        ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fillStyle = '#ef4444'; ctx.fill();
+      }
+    }
+    let crashHistory = [];
+    $('cBetBtn').addEventListener('click', async () => {
+      if (crashRunning) return;
+      const bet = parseFloat($('cBet').value);
+      if (!bet||bet<=0) return;
+      hideResult($('cResult'));
+      crashBetted = true; crashRunning = true;
+      $('cBetBtn').disabled = true; $('cCashoutBtn').disabled = false;
+      $('crashMulti').className = 'crash-multiplier running';
+      const crashPoint = (Math.random()*5 + 1).toFixed(2);
+      let multi = 1.00; let points = [{x:0,y:1}];
+      $('crashMulti').textContent = '1.00x';
+      const start = Date.now();
+      const iv = setInterval(() => {
+        const elapsed = (Date.now()-start)/1000;
+        multi = Math.pow(Math.E, elapsed * 0.15).toFixed(2);
+        points.push({x:elapsed,y:parseFloat(multi)});
+        $('crashMulti').textContent = multi + 'x';
+        if (parseFloat(multi) >= parseFloat(crashPoint)) {
+          clearInterval(iv); crashRunning = false;
+          $('cCashoutBtn').disabled = true;
+          $('crashMulti').className = 'crash-multiplier crashed';
+          drawCrash(points, parseFloat(crashPoint));
+          crashHistory.push(parseFloat(crashPoint));
+          $('cLast').textContent = crashPoint + 'x';
+          $('cGames').textContent = crashHistory.length;
+          showResult($('cResult'),'lose',`💥 Crashed at ${crashPoint}x — Lost ${bet.toFixed(2)} TON`);
+          $('cBetBtn').disabled = false;
+          crashBetted = false;
+        }
+      }, 50);
+    });
+    $('cCashoutBtn').addEventListener('click', () => {
+      if (!crashRunning) return;
+      const bet = parseFloat($('cBet').value);
+      const multi = parseFloat($('crashMulti').textContent);
+      crashRunning = false; $('cCashoutBtn').disabled = true;
+      $('crashMulti').className = 'crash-multiplier';
+      showResult($('cResult'),'win',`🎉 Cashed out at ${multi.toFixed(2)}x — Won ${(bet*multi).toFixed(2)} TON`);
+      $('cBetBtn').disabled = false;
+      crashBetted = false;
+    });
 
-      verifyResult.style.display = 'block';
-
-      let html = '';
-      if (seedMatch && outcomeMatch) {
-        verifyResult.className = 'verify-result pass';
-        html = '✅ GAME IS FAIR<br><small>';
-        html += `SHA256(seed) match: ✅<br>`;
-        html += `Outcome calculation: ✅</small>`;
+    // ===== MINES =====
+    let minesState = { active: false, grid: [], revealed: 0, gems: 0, totalMines: 3, bet: 0 };
+    function initMines() {
+      const grid = $('minesGrid'); grid.innerHTML = '';
+      for (let i=0; i<25; i++) {
+        const c = document.createElement('div');
+        c.className = 'cell'; c.dataset.idx = i; c.textContent = '⭐';
+        c.addEventListener('click', () => mineClick(i));
+        grid.appendChild(c);
+      }
+    }
+    function mineClick(idx) {
+      if (!minesState.active) return;
+      const cells = $('minesGrid').querySelectorAll('.cell');
+      const cell = cells[idx];
+      if (cell.classList.contains('revealed')) return;
+      const isBomb = minesState.grid[idx];
+      cell.classList.add('revealed');
+      if (isBomb) {
+        cell.classList.add('bomb'); cell.textContent = '💣';
+        minesState.active = false; $('mStart').disabled = false; $('mCashout').disabled = true;
+        minesState.grid.forEach((b,i) => {
+          if (b) { cells[i].classList.add('bomb'); cells[i].textContent = '💣'; cells[i].classList.add('revealed'); }
+        });
+        showResult($('mResult'),'lose',`💥 Hit a mine! Lost ${minesState.bet.toFixed(2)} TON`);
       } else {
-        verifyResult.className = 'verify-result fail';
-        html = '❌ CHEATING DETECTED!<br><small>';
-        if (!seedMatch) html += `Seed hash mismatch: ❌<br>`;
-        if (!outcomeMatch) html += `Outcome mismatch: ❌<br>`;
-        html += `This provider can be SLASHED!</small>`;
+        cell.classList.add('gem'); cell.textContent = '💎';
+        minesState.revealed++; minesState.gems++;
+        const prob = (25 - minesState.totalMines - minesState.gems) / (25 - minesState.gems);
+        const mult = 1 / prob;
+        $('mMulti').textContent = mult.toFixed(2) + 'x';
+        $('mRevealed').textContent = minesState.revealed;
+        if (minesState.gems === 25 - minesState.totalMines) {
+          minesState.active = false; $('mStart').disabled = false; $('mCashout').disabled = true;
+          showResult($('mResult'),'win',`🎉 Cleared all! Won ${(minesState.bet*mult).toFixed(2)} TON`);
+        }
       }
-
-      html += `<br><br><div style="font-size:10px;text-align:left;word-break:break-all">`;
-      html += `Server Seed: ${serverSeed}<br>`;
-      html += `Revealed Hash: ${computedHash}<br>`;
-      html += `Expected Hash: ${serverSeedHash}</div>`;
-
-      verifyResult.innerHTML = html;
     }
+    $('mStart').addEventListener('click', () => {
+      const bet = parseFloat($('mBet').value), totalMines = parseInt($('mMines').value);
+      if (!bet||bet<=0||totalMines<1||totalMines>24) return;
+      hideResult($('mResult'));
+      $('mStart').disabled = true; $('mCashout').disabled = false;
+      const grid = new Array(25).fill(false);
+      let placed = 0;
+      while (placed < totalMines) {
+        const idx = Math.floor(Math.random()*25);
+        if (!grid[idx]) { grid[idx]=true; placed++; }
+      }
+      minesState = { active:true, grid, revealed:0, gems:0, totalMines, bet };
+      $('mMulti').textContent = '1.00x'; $('mRevealed').textContent = '0';
+      $('minesGrid').querySelectorAll('.cell').forEach(c => { c.className='cell'; c.textContent='⭐'; });
+    });
+    $('mCashout').addEventListener('click', () => {
+      if (!minesState.active||minesState.gems===0) return;
+      minesState.active = false; $('mStart').disabled = false; $('mCashout').disabled = true;
+      const prob = (25 - minesState.totalMines - minesState.gems) / (25 - minesState.gems);
+      const mult = 1 / prob;
+      showResult($('mResult'),'win',`🎉 Cashed out ${mult.toFixed(2)}x = ${(minesState.bet*mult).toFixed(2)} TON`);
+    });
+    initMines();
 
-    spinBtn.addEventListener('click', spin);
-    verifyBtn.addEventListener('click', verifyGame);
+    // ===== TELEGRAM =====
+    if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
 
-    // Init Telegram Mini App
-    if (window.Telegram?.WebApp) {
-      Telegram.WebApp.ready();
-      Telegram.WebApp.expand();
-    }
+    // ===== BALANCE =====
+    $('balanceDisplay').textContent = '10.00 TON';
   </script>
 </body>
 </html>

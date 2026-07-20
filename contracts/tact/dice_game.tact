@@ -1,65 +1,66 @@
 import "./provably_fair";
 
+// DiceGame — stateless: только вычисляет результат, НЕ держит деньги.
+// Все финансы — в ProviderContract.
+
 message(0x21) BetDice {
     nonce: Int as uint64;
     guess: Int as uint8;
     clientSeed: Cell;
-    commitment: Cell;
     serverSeedHash: Cell;
 }
 
-message(0x22) RevealDice { nonce: Int as uint64; serverSeed: Cell; guess: Int as uint8; }
-message(0x24) DiceResult { diceRoll: Int as uint8; serverSeed: Cell; nonce: Int as uint64; }
+message(0x22) RevealDice {
+    nonce: Int as uint64;
+    serverSeed: Cell;
+    guess: Int as uint8;
+    clientSeed: Cell;
+}
+
+message(0x24) DiceResult {
+    diceRoll: Int as uint8;
+    win: Bool;
+    payoutMultiplier: Int as uint16; // в basis points: 60000 = 6x
+    serverSeedHash: Cell;
+    nonce: Int as uint64;
+}
 
 contract DiceGame {
-    minBet: Int as coins = 100000000;
-    maxBet: Int as coins = 100000000000;
-    houseEdgeBps: Int as uint16 = 500;
-    state: Int as uint8 = 0;
-    totalBets: Int as coins = 0;
-    totalPayouts: Int as coins = 0;
+    owner: Address;
 
-    pendingNonce: Int as uint64 = 0;
-    pendingBet: Int as coins = 0;
-    pendingGuess: Int as uint8 = 0;
-
-    receive(msg: BetDice) {
-        require(self.state == 0, "Paused");
-        require(msg.guess >= 1 && msg.guess <= 6, "1-6 only");
-        require(self.pendingNonce == 0, "Reveal previous bet first");
-        let betValue: Int = context().value;
-        require(betValue >= self.minBet, "Min bet");
-        require(betValue <= self.maxBet, "Max bet");
-        self.pendingNonce = msg.nonce;
-        self.pendingBet = betValue;
-        self.pendingGuess = msg.guess;
-        self.totalBets = self.totalBets + betValue;
+    init(owner: Address) {
+        self.owner = owner;
     }
 
+    // Вычисляет результат броска, возвращает payout multiplier bps
+    // Вызывается ProviderContract, НЕ напрямую игроком
     receive(msg: RevealDice) {
-        require(msg.nonce == self.pendingNonce, "Nonce mismatch");
-        require(self.pendingBet > 0, "No pending bet");
+        require(sender() == self.owner, "Only provider");
 
         let roll: Int = diceRoll(
             msg.serverSeed.beginParse(),
-            msg.serverSeed.beginParse(),
+            msg.clientSeed.beginParse(),
             msg.nonce
         );
 
-        let payout: Int = 0;
-        if (roll == msg.guess) {
-            payout = self.pendingBet * 6;
-            payout = payout * (10000 - self.houseEdgeBps) / 10000;
+        // guess 1-6, roll 1-6, прямой гейт
+        let win: Bool = roll == msg.guess;
+        let payoutBps: Int = 0;
+        if (win) {
+            // 6x = 60000 bps
+            payoutBps = 60000;
         }
 
-        self.pendingNonce = 0;
-        self.pendingBet = 0;
-        self.pendingGuess = 0;
-        self.totalPayouts = self.totalPayouts + payout;
         send(SendParameters{
             to: sender(),
-            value: payout,
-            body: DiceResult{ diceRoll: roll, serverSeed: msg.serverSeed, nonce: msg.nonce }.toCell(),
+            value: 0,
+            body: DiceResult{
+                diceRoll: roll,
+                win: win,
+                payoutMultiplier: payoutBps,
+                serverSeedHash: beginCell().storeSlice(msg.serverSeed.beginParse()).endCell(),
+                nonce: msg.nonce
+            }.toCell(),
         });
     }
 }

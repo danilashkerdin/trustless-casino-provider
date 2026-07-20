@@ -1,86 +1,56 @@
 // automatically generated from `@stdlib/std/stdlib.fc` `/Users/shkerdin.danila/Desktop/trustless_casino_provider/build/tact/DiceGame_DiceGame.fc` 
 PROGRAM{
-  DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
   DECLPROC $DiceResult$_store
   DECLPROC $DiceResult$_store_cell
   DECLPROC $DiceGame$_store
   DECLPROC $DiceGame$_load
-  DECLPROC $Context$_get_value
+  DECLPROC $DiceGame$init$_load
   DECLPROC $DiceGame$_contract_init
   DECLPROC $DiceGame$_contract_load
   DECLPROC $DiceGame$_contract_store
   DECLPROC $Cell$_fun_asSlice
   DECLPROC $global_diceRoll
   DECLPROC $SendParameters$_constructor_to_value_body
-  DECLPROC $DiceResult$_constructor_diceRoll_serverSeed_nonce
+  DECLPROC $DiceResult$_constructor_diceRoll_win_payoutMultiplier_serverSeedHash_nonce
   DECLPROC recv_internal
   DECLGLOBVAR __tact_context
   DECLGLOBVAR __tact_context_sender
   DECLGLOBVAR __tact_child_contract_codes
   DECLGLOBVAR __tact_randomized
-  __tact_context_get PROCINLINE:<{
-    __tact_context GETGLOB
-    4 UNTUPLE
-  }>
   __tact_context_get_sender PROCINLINE:<{
     __tact_context_sender GETGLOB
   }>
   $DiceResult$_store PROCINLINE:<{
     36 PUSHINT
-    s0 s4 XCHG2
+    s0 s6 XCHG2
     32 STU
-    s1 s2 XCHG
+    s1 s4 XCHG
     8 STU
+    s1 s2 XCHG
+    1 STI
+    16 STU
     STREF
     64 STU
   }>
   $DiceResult$_store_cell PROCINLINE:<{
-    3 -ROLL
+    5 -ROLL
     $DiceResult$_store INLINECALLDICT
     ENDC
   }>
   $DiceGame$_store PROCINLINE:<{
-    s9 s8 XCHG2
-    STVARUINT16
-    s0 s6 XCHG2
-    STVARUINT16
-    s1 s4 XCHG
-    16 STU
-    s1 s2 XCHG
-    8 STU
     SWAP
-    STVARUINT16
-    SWAP
-    STVARUINT16
-    64 STU
-    ROT
-    STVARUINT16
-    8 STU
+    STSLICE
   }>
   $DiceGame$_load PROCINLINE:<{
-    LDVARUINT16
-    LDVARUINT16
-    16 LDU
-    8 LDU
-    LDVARUINT16
-    LDVARUINT16
-    64 LDU
-    LDVARUINT16
-    8 LDU
-    9 -ROLL
+    LDMSGADDR
+    SWAP
   }>
-  $Context$_get_value PROCINLINE:<{
-    s1 s3 XCHG
-    3 BLKDROP
+  $DiceGame$init$_load PROCINLINE:<{
+    LDMSGADDR
+    SWAP
   }>
   $DiceGame$_contract_init PROCINLINE:<{
-    100000000 PUSHINT
-    100000000000 PUSHINT
-    500 PUSHINT
-    0 PUSHINT
-    s0 s0 s0 PUSH3
-    s0 s0 PUSH2
   }>
   $DiceGame$_contract_load PROCINLINE:<{
     c4 PUSH
@@ -89,9 +59,11 @@ PROGRAM{
     SWAP
     IF:<{
       $DiceGame$_load INLINECALLDICT
-      1 9 BLKDROP2
+      NIP
     }>ELSE<{
-      DROP
+      $DiceGame$init$_load INLINECALLDICT
+      SWAP
+      ENDS
       $DiceGame$_contract_init INLINECALLDICT
     }>
   }>
@@ -100,7 +72,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    9 -ROLL
+    SWAP
     $DiceGame$_store INLINECALLDICT
     ENDC
     c4 POP
@@ -137,7 +109,7 @@ PROGRAM{
     s4 s2 XCHG2
     TRUE
   }>
-  $DiceResult$_constructor_diceRoll_serverSeed_nonce PROCINLINE:<{
+  $DiceResult$_constructor_diceRoll_win_payoutMultiplier_serverSeedHash_nonce PROCINLINE:<{
   }>
   recv_internal PROC:<{
     SWAP
@@ -155,113 +127,50 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $DiceGame$_contract_load INLINECALLDICT
-    DROP
-    s0 s9 XCHG
+    s0 s2 XCHG
     IFJMP:<{
-      9 BLKDROP
+      2DROP
     }>
-    s0 s7 XCHG
     32 LDUQ 130 THROWIFNOT
-    OVER
-    33 EQINT
-    IFJMP:<{
-      NIP
-      s8 POP
-      s0 s7 XCHG
-      64 LDU
-      8 LDU
-      DROP
-      59457 PUSHINT
-      s4 PUSH
-      0 EQINT
-      THROWANYIFNOT
-      34905 PUSHINT
-      OVER
-      0 GTINT
-      IF:<{
-        OVER
-        7 LESSINT
-      }>ELSE<{
-        FALSE
-      }>
-      THROWANYIFNOT
-      47276 PUSHINT
-      s0 s8 XCHG
-      0 EQINT
-      s1 s8 XCHG
-      THROWANYIFNOT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      20685 PUSHINT
-      s1 s7 PUSH2
-      GEQ
-      THROWANYIFNOT
-      46897 PUSHINT
-      s1 s6 PUSH2
-      LEQ
-      THROWANYIFNOT
-      s2 s2 XCPU
-      ADD
-      s6 s8 XCHG
-      s5 s7 XCHG
-      s4 s6 XCHG
-      s3 s5 XCHG
-      s0 s4 XCHG
-      s2 s3 XCHG2
-      $DiceGame$_contract_store INLINECALLDICT
-    }>
     SWAP
     34 EQINT
     IFJMP:<{
       64 LDU
       LDREF
       8 LDU
+      LDREF
       DROP
-      s2 PUSH
-      44244 PUSHINT
-      s0 s11 XCHG
-      EQUAL
-      s1 s10 XCHG
-      THROWANYIFNOT
-      27815 PUSHINT
-      s10 PUSH
-      0 GTINT
-      THROWANYIFNOT
-      DUP
-          CTOS
-      OVER
-          CTOS
-      s3 PUSH
-      $global_diceRoll INLINECALLDICT
-      DUP
-      0 PUSHINT
-      s0 s11 XCHG
-      EQUAL
-      IF:<{
-        s9 POP
-        s0 s9 XCHG
-        6 MULCONST
-        10000 PUSHINT
-        s6 PUSH
-        SUB
-        MUL
-        10000 PUSHINT
-        DIV
-        s0 s8 XCHG
-        s0 s9 XCHG
-      }>ELSE<{
-        s10 POP
-      }>
-      0 PUSHINT
-      s0 s(-1) s3 PU2XC
-      s11 PUSH
-      ADD
+      32793 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s13 s4 s5 XCHG3
-      $DiceResult$_constructor_diceRoll_serverSeed_nonce INLINECALLDICT
+      s6 PUSH
+      SDEQ
+      THROWANYIFNOT
+      s2 PUSH
+          CTOS
+      SWAP
+          CTOS
+      s4 PUSH
+      $global_diceRoll INLINECALLDICT
+      s0 s1 PUXC
+      EQUAL
+      0 PUSHINT
+      OVER
+      IF:<{
+        DROP
+        60000 PUSHINT
+      }>
+      __tact_context_get_sender INLINECALLDICT
+      0 PUSHINT
+          NEWC
+      s0 s6 XCHG
+          CTOS
+      s1 s6 XCHG
+          STSLICER
+          ENDC
+      s0 s6 XCHG2
+      $DiceResult$_constructor_diceRoll_win_payoutMultiplier_serverSeedHash_nonce INLINECALLDICT
       NEWC
       $DiceResult$_store_cell INLINECALLDICT
-      s3 s10 s0 XCHG3
       $SendParameters$_constructor_to_value_body INLINECALLDICT
           NEWC
           b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
@@ -329,15 +238,9 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s6 s8 XCHG
-      s5 s7 XCHG
-      s4 s6 XCHG
-      s3 s5 XCHG
-      s4 s1 s3 XCHG3
-      -ROT
       $DiceGame$_contract_store INLINECALLDICT
     }>
-    9 BLKDROP
+    2DROP
     130 THROW
   }>
 }END>c

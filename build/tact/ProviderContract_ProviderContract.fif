@@ -12,17 +12,17 @@ PROGRAM{
   DECLPROC $ProviderContract$_contract_load
   DECLPROC $ProviderContract$_contract_store
   DECLPROC $Cell$_fun_asSlice
-  DECLPROC $global_calculateResult
-  DECLPROC $global_getMultiplier
-  DECLPROC $global_calcPayout
+  DECLPROC $global_diceRoll
   DECLPROC $ProviderContract$_fun_getStake
   DECLPROC $ProviderContract$_fun_getCommission
+  DECLPROC $ProviderContract$_fun_getTotalCommission
   DECLPROC $ProviderContract$_fun_getTotalGames
   DECLPROC $ProviderContract$_fun_getRtp
   DECLPROC $SendParameters$_constructor_to_value_body
-  DECLPROC $GameResult$_constructor_outcome_multiplier_payout_serverSeed_nonce
+  DECLPROC $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce
   128972 DECLMETHOD %getStake
   91597 DECLMETHOD %getCommission
+  70794 DECLMETHOD %getTotalCommission
   72646 DECLMETHOD %getTotalGames
   110578 DECLMETHOD %getRtp
   DECLPROC recv_internal
@@ -39,25 +39,12 @@ PROGRAM{
   }>
   $GameResult$_store PROCINLINE:<{
     32 PUSHINT
-    s0 s6 XCHG2
+    s0 s9 XCHG2
     32 STU
-    s1 s4 XCHG
+    s1 s7 XCHG
     32 STU
-    s1 s2 XCHG
-    16 STU
-    SWAP
-    STVARUINT16
-    STREF
-    64 STU
-  }>
-  $GameResult$_store_cell PROCINLINE:<{
-    5 -ROLL
-    $GameResult$_store INLINECALLDICT
-    ENDC
-  }>
-  $ProviderContract$_store PROCINLINE:<{
-    s5 s6 XCHG2
-    STSLICE
+    s1 s5 XCHG
+    1 STI
     s1 s3 XCHG
     16 STU
     SWAP
@@ -66,7 +53,36 @@ PROGRAM{
     STVARUINT16
     SWAP
     STVARUINT16
+    STREF
+    64 STU
+  }>
+  $GameResult$_store_cell PROCINLINE:<{
+    8 -ROLL
+    $GameResult$_store INLINECALLDICT
+    ENDC
+  }>
+  $ProviderContract$_store PROCINLINE:<{
+    s9 s10 XCHG2
+    STSLICE
+    s1 s7 XCHG
+    16 STU
+    s0 s5 XCHG2
+    STVARUINT16
+    s0 s3 XCHG2
+    STVARUINT16
+    SWAP
+    STVARUINT16
+    SWAP
+    STVARUINT16
     32 STU
+    SWAP
+    NEWC
+    STSLICE
+    ROT
+    STVARUINT16
+    s1 s2 XCHG
+    8 STU
+    STBREFR
   }>
   $ProviderContract$_load PROCINLINE:<{
     LDMSGADDR
@@ -74,8 +90,22 @@ PROGRAM{
     LDVARUINT16
     LDVARUINT16
     LDVARUINT16
+    LDVARUINT16
     32 LDU
-    6 -ROLL
+    LDREF
+    SWAP
+    CTOS
+    LDMSGADDR
+    LDVARUINT16
+    8 LDU
+    DROP
+    s3 s10 XCHG
+    s3 s9 XCHG
+    s3 s8 XCHG
+    s3 s7 XCHG
+    s3 s6 XCHG
+    s3 s5 XCHG
+    s3 s4 XCHG
   }>
   $Context$_get_value PROCINLINE:<{
     s1 s3 XCHG
@@ -90,6 +120,9 @@ PROGRAM{
   $ProviderContract$_contract_init PROCINLINE:<{
     0 PUSHINT
     s0 s0 s0 PUSH3
+    s0 s0 s0 PUSH3
+    s8 PUSH
+    -ROT
   }>
   $ProviderContract$_contract_load PROCINLINE:<{
     c4 PUSH
@@ -98,7 +131,7 @@ PROGRAM{
     SWAP
     IF:<{
       $ProviderContract$_load INLINECALLDICT
-      1 6 BLKDROP2
+      1 10 BLKDROP2
     }>ELSE<{
       $ProviderContract$init$_load INLINECALLDICT
       s0 s2 XCHG
@@ -112,7 +145,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    6 -ROLL
+    10 -ROLL
     $ProviderContract$_store INLINECALLDICT
     ENDC
     c4 POP
@@ -120,7 +153,7 @@ PROGRAM{
   $Cell$_fun_asSlice PROCINLINE:<{
         CTOS
   }>
-  $global_calculateResult PROCREF:<{
+  $global_diceRoll PROCREF:<{
         NEWC
     s0 s3 XCHG2
         STSLICER
@@ -137,75 +170,31 @@ PROGRAM{
                     HASHEXT_SHA256
                 }> PUSHCONT
                 1 1 CALLXARGS
-    10000 PUSHINT
+    6 PUSHINT
     MOD
-  }>
-  $global_getMultiplier PROCREF:<{
-    DUP
-    9500 PUSHINT
-    GEQ
-    IFJMP:<{
-      DROP
-      100000 PUSHINT
-    }>
-    DUP
-    9000 PUSHINT
-    GEQ
-    IFJMP:<{
-      DROP
-      50000 PUSHINT
-    }>
-    DUP
-    8000 PUSHINT
-    GEQ
-    IFJMP:<{
-      DROP
-      30000 PUSHINT
-    }>
-    DUP
-    6000 PUSHINT
-    GEQ
-    IFJMP:<{
-      DROP
-      20000 PUSHINT
-    }>
-    DUP
-    4000 PUSHINT
-    GEQ
-    IFJMP:<{
-      DROP
-      15000 PUSHINT
-    }>
-    2000 PUSHINT
-    GEQ
-    IFJMP:<{
-      10000 PUSHINT
-    }>
-    0 PUSHINT
-  }>
-  $global_calcPayout PROCREF:<{
-    MUL
-    10000 PUSHINT
-    DIV
+    INC
   }>
   $ProviderContract$_fun_getStake PROCREF:<{
-    s3 PUSH
+    s7 PUSH
   }>
   $ProviderContract$_fun_getCommission PROCREF:<{
+    s8 PUSH
+  }>
+  $ProviderContract$_fun_getTotalCommission PROCREF:<{
     s4 PUSH
   }>
   $ProviderContract$_fun_getTotalGames PROCREF:<{
-    DUP
+    s3 PUSH
   }>
   $ProviderContract$_fun_getRtp PROCREF:<{
-    s2 PUSH
+    s6 PUSH
     IFNOTJMP:<{
       0 PUSHINT
     }>
-    OVER
+    s5 PUSH
     10000 PUSHINT
     MUL
-    s3 PUSH
+    s7 PUSH
     DIV
   }>
   $SendParameters$_constructor_to_value_body PROCINLINE:<{
@@ -216,27 +205,32 @@ PROGRAM{
     s4 s2 XCHG2
     TRUE
   }>
-  $GameResult$_constructor_outcome_multiplier_payout_serverSeed_nonce PROCINLINE:<{
+  $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce PROCINLINE:<{
   }>
   %getStake PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getStake INLINECALLDICT
-    6 1 BLKDROP2
+    10 1 BLKDROP2
   }>
   %getCommission PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getCommission INLINECALLDICT
-    6 1 BLKDROP2
+    10 1 BLKDROP2
+  }>
+  %getTotalCommission PROC:<{
+    $ProviderContract$_contract_load INLINECALLDICT
+    $ProviderContract$_fun_getTotalCommission INLINECALLDICT
+    10 1 BLKDROP2
   }>
   %getTotalGames PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getTotalGames INLINECALLDICT
-    6 1 BLKDROP2
+    10 1 BLKDROP2
   }>
   %getRtp PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getRtp INLINECALLDICT
-    6 1 BLKDROP2
+    10 1 BLKDROP2
   }>
   recv_internal PROC:<{
     SWAP
@@ -254,11 +248,11 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $ProviderContract$_contract_load INLINECALLDICT
-    s0 s7 XCHG
+    s0 s11 XCHG
     IFJMP:<{
-      7 BLKDROP
+      11 BLKDROP
     }>
-    s0 s5 XCHG
+    s0 s9 XCHG
     32 LDUQ 130 THROWIFNOT
     OVER
     16 EQINT
@@ -266,10 +260,15 @@ PROGRAM{
       2DROP
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
-      s1 s2 XCHG
+      s1 s6 XCHG
       ADD
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s0 s7 XCHG
+      s4 s6 XCHG
       s3 s5 XCHG
-      s1 s4 s3 XCHG3
+      s4 s3 s0 XCHG3
+      s1 s2 XCHG
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
@@ -280,7 +279,7 @@ PROGRAM{
       DROP
       35499 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s6 PUSH
+      s10 PUSH
       SDEQ
       THROWANYIFNOT
       11977 PUSHINT
@@ -288,12 +287,12 @@ PROGRAM{
       0 GTINT
       THROWANYIFNOT
       21245 PUSHINT
-      s3 s1 PUSH2
+      s7 s1 PUSH2
       GEQ
       THROWANYIFNOT
-      s2 s2 XCPU
+      s6 s6 XCPU
       SUB
-      s4 s2 PUXC
+      s8 s6 PUXC
       PUSHNULL
       $SendParameters$_constructor_to_value_body INLINECALLDICT
           NEWC
@@ -362,21 +361,21 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s3 s5 XCHG
-      2 3 BLKSWAP
+      s7 s9 XCHG
+      2 7 BLKSWAP
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
     18 EQINT
     IFJMP:<{
       NIP
-      s3 POP
-      s0 s2 XCHG
+      s7 POP
+      s0 s6 XCHG
       16 LDU
       DROP
       35499 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s5 PUSH
+      s9 PUSH
       SDEQ
       THROWANYIFNOT
       20824 PUSHINT
@@ -384,18 +383,37 @@ PROGRAM{
       10000 PUSHINT
       LEQ
       THROWANYIFNOT
+      s7 s9 XCHG
+      s0 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
       s3 s5 XCHG
-      s4 s4 XCHG2
-      s0 s3 XCHG
+      s4 s0 s3 XCHG3
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
     1 EQINT
     IFJMP:<{
+      s11 POP
       2DROP
-      43379 PUSHINT
-      s2 PUSH
+      s0 s8 XCHG
+      64 LDU
+      NIP
+      8 LDU
+      DROP
+      11191 PUSHINT
+      s5 PUSH
       0 GTINT
+      THROWANYIFNOT
+      62748 PUSHINT
+      OVER
+      0 GTINT
+      IF:<{
+        OVER
+        7 LESSINT
+      }>ELSE<{
+        FALSE
+      }>
       THROWANYIFNOT
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
@@ -403,12 +421,22 @@ PROGRAM{
       OVER
       0 GTINT
       THROWANYIFNOT
+      8045 PUSHINT
+      s0 s9 XCHG
+      0 EQINT
+      s1 s9 XCHG
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s4 s8 XCPU
       ADD
-      s0 s5 XCHG
+      s0 s9 XCHG
       INC
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s5 s6 XCHG
       s3 s5 XCHG
-      s4 s3 s0 XCHG3
-      s1 s2 XCHG
+      s4 s3 s3 XCHG3
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     SWAP
@@ -416,33 +444,79 @@ PROGRAM{
     IFJMP:<{
       64 LDU
       LDREF
+      8 LDU
+      NIP
+      LDREF
       DROP
-      DUP
-          CTOS
+      28115 PUSHINT
+      s9 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      27815 PUSHINT
+      s12 PUSH
+      0 GTINT
+      THROWANYIFNOT
       OVER
+          CTOS
+      SWAP
           CTOS
       s3 PUSH
-      $global_calculateResult INLINECALLDICT
-      DUP
-      $global_getMultiplier INLINECALLDICT
-      10000 PUSHINT
-      s7 PUSH
-      SUB
-      MUL
-      10000 PUSHINT
-      DIV
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      OVER
-      $global_calcPayout INLINECALLDICT
-      s9 s9 XCPU
-      ADD
-      __tact_context_get_sender INLINECALLDICT
-      s10 s4 s5 PUXC2
-      $GameResult$_constructor_outcome_multiplier_payout_serverSeed_nonce INLINECALLDICT
+      $global_diceRoll INLINECALLDICT
+      s0 s12 PUXC
+      EQUAL
+      0 PUSHINT
+      s0 s0 s1 PUSH3
+      IF:<{
+        3 BLKDROP
+        s0 s11 XCHG
+        6 MULCONST
+        s0 s9 PUSH2
+        MUL
+        10000 PUSHINT
+        DIV
+        s0 s1 PUSH2
+        GREATER
+        IF:<{
+          DROP
+          DUP
+        }>
+        2DUP
+        SUB
+        21245 PUSHINT
+        s11 s1 PUSH2
+        GEQ
+        THROWANYIFNOT
+        s10 s10 XCPU
+        SUB
+        s8 s10 XCPU
+        ADD
+        s7 s1 XCPU
+        ADD
+        s10 s13 XCHG
+        s8 s10 XCHG
+        s0 s7 XCHG
+        s8 s8 s8 XCHG3
+      }>ELSE<{
+        s14 POP
+      }>
+      0 PUSHINT
+      s0 s3 PUSH2
+      IF:<{
+        60000 PUSHINT
+      }>ELSE<{
+        DUP
+      }>
+      s6 17 s() XCHG
+      s0 s4 XCHG
+      s3 s1 s3 XCHG3
+      16 s() PUSH
+      s0 s2 XCHG
+      s1 18 s() XCHG
+      s0 s8 XCHG
+      $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce INLINECALLDICT
       NEWC
       $GameResult$_store_cell INLINECALLDICT
-      s1 s7 s0 XCHG3
+      s2 s10 s10 PUXC2
       $SendParameters$_constructor_to_value_body INLINECALLDICT
           NEWC
           b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
@@ -510,11 +584,10 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s3 s5 XCHG
-      2 3 BLKSWAP
+      2 8 BLKSWAP
       $ProviderContract$_contract_store INLINECALLDICT
     }>
-    7 BLKDROP
+    11 BLKDROP
     130 THROW
   }>
 }END>c

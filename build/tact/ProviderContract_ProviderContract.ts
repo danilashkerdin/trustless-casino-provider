@@ -747,8 +747,8 @@ export function dictValueParserSetCommission(): DictionaryValue<SetCommission> {
 export type PlaceBet = {
     $$type: 'PlaceBet';
     nonce: bigint;
+    guess: bigint;
     clientSeed: Cell;
-    commitment: Cell;
     serverSeedHash: Cell;
 }
 
@@ -757,8 +757,8 @@ export function storePlaceBet(src: PlaceBet) {
         const b_0 = builder;
         b_0.storeUint(1, 32);
         b_0.storeUint(src.nonce, 64);
+        b_0.storeUint(src.guess, 8);
         b_0.storeRef(src.clientSeed);
-        b_0.storeRef(src.commitment);
         b_0.storeRef(src.serverSeedHash);
     };
 }
@@ -767,33 +767,33 @@ export function loadPlaceBet(slice: Slice) {
     const sc_0 = slice;
     if (sc_0.loadUint(32) !== 1) { throw Error('Invalid prefix'); }
     const _nonce = sc_0.loadUintBig(64);
+    const _guess = sc_0.loadUintBig(8);
     const _clientSeed = sc_0.loadRef();
-    const _commitment = sc_0.loadRef();
     const _serverSeedHash = sc_0.loadRef();
-    return { $$type: 'PlaceBet' as const, nonce: _nonce, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function loadTuplePlaceBet(source: TupleReader) {
     const _nonce = source.readBigNumber();
+    const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _commitment = source.readCell();
     const _serverSeedHash = source.readCell();
-    return { $$type: 'PlaceBet' as const, nonce: _nonce, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function loadGetterTuplePlaceBet(source: TupleReader) {
     const _nonce = source.readBigNumber();
+    const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _commitment = source.readCell();
     const _serverSeedHash = source.readCell();
-    return { $$type: 'PlaceBet' as const, nonce: _nonce, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function storeTuplePlaceBet(source: PlaceBet) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.nonce);
+    builder.writeNumber(source.guess);
     builder.writeCell(source.clientSeed);
-    builder.writeCell(source.commitment);
     builder.writeCell(source.serverSeedHash);
     return builder.build();
 }
@@ -813,6 +813,8 @@ export type RevealSeed = {
     $$type: 'RevealSeed';
     nonce: bigint;
     serverSeed: Cell;
+    guess: bigint;
+    clientSeed: Cell;
 }
 
 export function storeRevealSeed(src: RevealSeed) {
@@ -821,6 +823,8 @@ export function storeRevealSeed(src: RevealSeed) {
         b_0.storeUint(2, 32);
         b_0.storeUint(src.nonce, 64);
         b_0.storeRef(src.serverSeed);
+        b_0.storeUint(src.guess, 8);
+        b_0.storeRef(src.clientSeed);
     };
 }
 
@@ -829,25 +833,33 @@ export function loadRevealSeed(slice: Slice) {
     if (sc_0.loadUint(32) !== 2) { throw Error('Invalid prefix'); }
     const _nonce = sc_0.loadUintBig(64);
     const _serverSeed = sc_0.loadRef();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed };
+    const _guess = sc_0.loadUintBig(8);
+    const _clientSeed = sc_0.loadRef();
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadTupleRevealSeed(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _serverSeed = source.readCell();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed };
+    const _guess = source.readBigNumber();
+    const _clientSeed = source.readCell();
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadGetterTupleRevealSeed(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _serverSeed = source.readCell();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed };
+    const _guess = source.readBigNumber();
+    const _clientSeed = source.readCell();
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function storeTupleRevealSeed(source: RevealSeed) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.nonce);
     builder.writeCell(source.serverSeed);
+    builder.writeNumber(source.guess);
+    builder.writeCell(source.clientSeed);
     return builder.build();
 }
 
@@ -862,117 +874,14 @@ export function dictValueParserRevealSeed(): DictionaryValue<RevealSeed> {
     }
 }
 
-export type ClaimWin = {
-    $$type: 'ClaimWin';
-    nonce: bigint;
-}
-
-export function storeClaimWin(src: ClaimWin) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(5, 32);
-        b_0.storeUint(src.nonce, 64);
-    };
-}
-
-export function loadClaimWin(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 5) { throw Error('Invalid prefix'); }
-    const _nonce = sc_0.loadUintBig(64);
-    return { $$type: 'ClaimWin' as const, nonce: _nonce };
-}
-
-export function loadTupleClaimWin(source: TupleReader) {
-    const _nonce = source.readBigNumber();
-    return { $$type: 'ClaimWin' as const, nonce: _nonce };
-}
-
-export function loadGetterTupleClaimWin(source: TupleReader) {
-    const _nonce = source.readBigNumber();
-    return { $$type: 'ClaimWin' as const, nonce: _nonce };
-}
-
-export function storeTupleClaimWin(source: ClaimWin) {
-    const builder = new TupleBuilder();
-    builder.writeNumber(source.nonce);
-    return builder.build();
-}
-
-export function dictValueParserClaimWin(): DictionaryValue<ClaimWin> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeClaimWin(src)).endCell());
-        },
-        parse: (src) => {
-            return loadClaimWin(src.loadRef().beginParse());
-        }
-    }
-}
-
-export type SlashStake = {
-    $$type: 'SlashStake';
-    proofServerSeed: Cell;
-    proofNonce: bigint;
-    proofSender: Address;
-}
-
-export function storeSlashStake(src: SlashStake) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(6, 32);
-        b_0.storeRef(src.proofServerSeed);
-        b_0.storeUint(src.proofNonce, 64);
-        b_0.storeAddress(src.proofSender);
-    };
-}
-
-export function loadSlashStake(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 6) { throw Error('Invalid prefix'); }
-    const _proofServerSeed = sc_0.loadRef();
-    const _proofNonce = sc_0.loadUintBig(64);
-    const _proofSender = sc_0.loadAddress();
-    return { $$type: 'SlashStake' as const, proofServerSeed: _proofServerSeed, proofNonce: _proofNonce, proofSender: _proofSender };
-}
-
-export function loadTupleSlashStake(source: TupleReader) {
-    const _proofServerSeed = source.readCell();
-    const _proofNonce = source.readBigNumber();
-    const _proofSender = source.readAddress();
-    return { $$type: 'SlashStake' as const, proofServerSeed: _proofServerSeed, proofNonce: _proofNonce, proofSender: _proofSender };
-}
-
-export function loadGetterTupleSlashStake(source: TupleReader) {
-    const _proofServerSeed = source.readCell();
-    const _proofNonce = source.readBigNumber();
-    const _proofSender = source.readAddress();
-    return { $$type: 'SlashStake' as const, proofServerSeed: _proofServerSeed, proofNonce: _proofNonce, proofSender: _proofSender };
-}
-
-export function storeTupleSlashStake(source: SlashStake) {
-    const builder = new TupleBuilder();
-    builder.writeCell(source.proofServerSeed);
-    builder.writeNumber(source.proofNonce);
-    builder.writeAddress(source.proofSender);
-    return builder.build();
-}
-
-export function dictValueParserSlashStake(): DictionaryValue<SlashStake> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeSlashStake(src)).endCell());
-        },
-        parse: (src) => {
-            return loadSlashStake(src.loadRef().beginParse());
-        }
-    }
-}
-
 export type GameResult = {
     $$type: 'GameResult';
     outcome: bigint;
-    multiplier: bigint;
-    payout: bigint;
+    win: boolean;
+    multiplierBps: bigint;
+    grossPayout: bigint;
+    commissionTaken: bigint;
+    netPayout: bigint;
     serverSeed: Cell;
     nonce: bigint;
 }
@@ -982,8 +891,11 @@ export function storeGameResult(src: GameResult) {
         const b_0 = builder;
         b_0.storeUint(32, 32);
         b_0.storeUint(src.outcome, 32);
-        b_0.storeUint(src.multiplier, 16);
-        b_0.storeCoins(src.payout);
+        b_0.storeBit(src.win);
+        b_0.storeUint(src.multiplierBps, 16);
+        b_0.storeCoins(src.grossPayout);
+        b_0.storeCoins(src.commissionTaken);
+        b_0.storeCoins(src.netPayout);
         b_0.storeRef(src.serverSeed);
         b_0.storeUint(src.nonce, 64);
     };
@@ -993,36 +905,48 @@ export function loadGameResult(slice: Slice) {
     const sc_0 = slice;
     if (sc_0.loadUint(32) !== 32) { throw Error('Invalid prefix'); }
     const _outcome = sc_0.loadUintBig(32);
-    const _multiplier = sc_0.loadUintBig(16);
-    const _payout = sc_0.loadCoins();
+    const _win = sc_0.loadBit();
+    const _multiplierBps = sc_0.loadUintBig(16);
+    const _grossPayout = sc_0.loadCoins();
+    const _commissionTaken = sc_0.loadCoins();
+    const _netPayout = sc_0.loadCoins();
     const _serverSeed = sc_0.loadRef();
     const _nonce = sc_0.loadUintBig(64);
-    return { $$type: 'GameResult' as const, outcome: _outcome, multiplier: _multiplier, payout: _payout, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'GameResult' as const, outcome: _outcome, win: _win, multiplierBps: _multiplierBps, grossPayout: _grossPayout, commissionTaken: _commissionTaken, netPayout: _netPayout, serverSeed: _serverSeed, nonce: _nonce };
 }
 
 export function loadTupleGameResult(source: TupleReader) {
     const _outcome = source.readBigNumber();
-    const _multiplier = source.readBigNumber();
-    const _payout = source.readBigNumber();
+    const _win = source.readBoolean();
+    const _multiplierBps = source.readBigNumber();
+    const _grossPayout = source.readBigNumber();
+    const _commissionTaken = source.readBigNumber();
+    const _netPayout = source.readBigNumber();
     const _serverSeed = source.readCell();
     const _nonce = source.readBigNumber();
-    return { $$type: 'GameResult' as const, outcome: _outcome, multiplier: _multiplier, payout: _payout, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'GameResult' as const, outcome: _outcome, win: _win, multiplierBps: _multiplierBps, grossPayout: _grossPayout, commissionTaken: _commissionTaken, netPayout: _netPayout, serverSeed: _serverSeed, nonce: _nonce };
 }
 
 export function loadGetterTupleGameResult(source: TupleReader) {
     const _outcome = source.readBigNumber();
-    const _multiplier = source.readBigNumber();
-    const _payout = source.readBigNumber();
+    const _win = source.readBoolean();
+    const _multiplierBps = source.readBigNumber();
+    const _grossPayout = source.readBigNumber();
+    const _commissionTaken = source.readBigNumber();
+    const _netPayout = source.readBigNumber();
     const _serverSeed = source.readCell();
     const _nonce = source.readBigNumber();
-    return { $$type: 'GameResult' as const, outcome: _outcome, multiplier: _multiplier, payout: _payout, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'GameResult' as const, outcome: _outcome, win: _win, multiplierBps: _multiplierBps, grossPayout: _grossPayout, commissionTaken: _commissionTaken, netPayout: _netPayout, serverSeed: _serverSeed, nonce: _nonce };
 }
 
 export function storeTupleGameResult(source: GameResult) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.outcome);
-    builder.writeNumber(source.multiplier);
-    builder.writeNumber(source.payout);
+    builder.writeBoolean(source.win);
+    builder.writeNumber(source.multiplierBps);
+    builder.writeNumber(source.grossPayout);
+    builder.writeNumber(source.commissionTaken);
+    builder.writeNumber(source.netPayout);
     builder.writeCell(source.serverSeed);
     builder.writeNumber(source.nonce);
     return builder.build();
@@ -1046,7 +970,11 @@ export type ProviderContract$Data = {
     stake: bigint;
     totalBets: bigint;
     totalPayouts: bigint;
+    totalCommission: bigint;
     gameCount: bigint;
+    pendingSender: Address;
+    pendingBetAmount: bigint;
+    pendingGuess: bigint;
 }
 
 export function storeProviderContract$Data(src: ProviderContract$Data) {
@@ -1057,7 +985,13 @@ export function storeProviderContract$Data(src: ProviderContract$Data) {
         b_0.storeCoins(src.stake);
         b_0.storeCoins(src.totalBets);
         b_0.storeCoins(src.totalPayouts);
+        b_0.storeCoins(src.totalCommission);
         b_0.storeUint(src.gameCount, 32);
+        const b_1 = new Builder();
+        b_1.storeAddress(src.pendingSender);
+        b_1.storeCoins(src.pendingBetAmount);
+        b_1.storeUint(src.pendingGuess, 8);
+        b_0.storeRef(b_1.endCell());
     };
 }
 
@@ -1068,8 +1002,13 @@ export function loadProviderContract$Data(slice: Slice) {
     const _stake = sc_0.loadCoins();
     const _totalBets = sc_0.loadCoins();
     const _totalPayouts = sc_0.loadCoins();
+    const _totalCommission = sc_0.loadCoins();
     const _gameCount = sc_0.loadUintBig(32);
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, gameCount: _gameCount };
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _pendingSender = sc_1.loadAddress();
+    const _pendingBetAmount = sc_1.loadCoins();
+    const _pendingGuess = sc_1.loadUintBig(8);
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
 }
 
 export function loadTupleProviderContract$Data(source: TupleReader) {
@@ -1078,8 +1017,12 @@ export function loadTupleProviderContract$Data(source: TupleReader) {
     const _stake = source.readBigNumber();
     const _totalBets = source.readBigNumber();
     const _totalPayouts = source.readBigNumber();
+    const _totalCommission = source.readBigNumber();
     const _gameCount = source.readBigNumber();
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, gameCount: _gameCount };
+    const _pendingSender = source.readAddress();
+    const _pendingBetAmount = source.readBigNumber();
+    const _pendingGuess = source.readBigNumber();
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
 }
 
 export function loadGetterTupleProviderContract$Data(source: TupleReader) {
@@ -1088,8 +1031,12 @@ export function loadGetterTupleProviderContract$Data(source: TupleReader) {
     const _stake = source.readBigNumber();
     const _totalBets = source.readBigNumber();
     const _totalPayouts = source.readBigNumber();
+    const _totalCommission = source.readBigNumber();
     const _gameCount = source.readBigNumber();
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, gameCount: _gameCount };
+    const _pendingSender = source.readAddress();
+    const _pendingBetAmount = source.readBigNumber();
+    const _pendingGuess = source.readBigNumber();
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
 }
 
 export function storeTupleProviderContract$Data(source: ProviderContract$Data) {
@@ -1099,7 +1046,11 @@ export function storeTupleProviderContract$Data(source: ProviderContract$Data) {
     builder.writeNumber(source.stake);
     builder.writeNumber(source.totalBets);
     builder.writeNumber(source.totalPayouts);
+    builder.writeNumber(source.totalCommission);
     builder.writeNumber(source.gameCount);
+    builder.writeAddress(source.pendingSender);
+    builder.writeNumber(source.pendingBetAmount);
+    builder.writeNumber(source.pendingGuess);
     return builder.build();
 }
 
@@ -1129,7 +1080,7 @@ function initProviderContract_init_args(src: ProviderContract_init_args) {
 }
 
 async function ProviderContract_init(owner: Address, commissionBps: bigint) {
-    const __code = Cell.fromHex('b5ee9c72410216010003aa000114ff00f4a413f4bcf2c80b01020162020b01f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e10fa40d30ffa00fa00fa00d31f55506c169ffa40810101d7005902d10170547000e207925f07e005d70d1ff2e08221c0108e295bf8416f24135f0312a010354143c87f01ca0055505056ce13cb0f01fa0201fa0201fa02cb1fc9ed54e00303aa21c011e30221c0128e3b313302d30f3082008aabf84225c705f2f481515821812710bbf2f41035504403c87f01ca0055505056ce13cb0f01fa0201fa0201fa02cb1fc9ed54e021c001e30201c002e3025f07f2c08204050600f831fa003082008aabf84226c705f2f4812ec921c200f2f48152fd5331bef2f45122a152436d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0010355512c87f01ca0055505056ce13cb0f01fa0201fa0201fa02cb1fc9ed54007a5b8200a97322c200f2f4f8416f24135f038200dd4621c200f2f4a005a41035443012c87f01ca0055505056ce13cb0f01fa0201fa0201fa02cb1fc9ed5404fed33fd43020d021d023db3c20db3c81271027a1a8812710a904f8416f24135f0321db3c5199a0f842544a56c8554080205006cb1f14cb1f12cb0f01fa02cccb3fc94170706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00103555120708090a003ec85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da11812710a90800862081251cbe9530820186a0e020812328be95308200c350e020811f40be9430817530e020811770be9430814e20e020810fa0be9430813a98e08107d0be93812710e070000ca8812710a9040036c87f01ca0055505056ce13cb0f01fa0201fa0201fa02cb1fc9ed540201200c110201200d0f015fb9bc6ed44d0d200018e10fa40d30ffa00fa00fa00d31f55506c169ffa40810101d7005902d10170547000e2db3c6c6180e000220015fba5cded44d0d200018e10fa40d30ffa00fa00fa00d31f55506c169ffa40810101d7005902d10170547000e2db3c6c618100002240201201214015fbaff2ed44d0d200018e10fa40d30ffa00fa00fa00d31f55506c169ffa40810101d7005902d10170547000e2db3c6c618130018229170e121812710a823a904015fbb7cced44d0d200018e10fa40d30ffa00fa00fa00d31f55506c169ffa40810101d7005902d10170547000e2db3c6c61815000223c3a83cef');
+    const __code = Cell.fromHex('b5ee9c72410219010004fa000114ff00f4a413f4bcf2c80b01020162020b04f6d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e20b925f0be009d70d1ff2e08221c010e30221c011e30221c012e302210304050600805bf8416f24135f0316a0107910680710461035443012c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed5401c231fa003082008aabf8422ac705f2f4812ec921c200f2f48152fd5371bef2f45166a152876d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00107955160a00a0313706d30f3082008aabf84229c705f2f481515821812710bbf2f41079081057104610354403c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed5401fec0018e773b5b08d33f31d30730812bb725c200f2f48200f51c21c2009321c1079170e2f2f4f8416f24135f038200dd4621c200f2f4811f6d09c00019f2f4f8425148a009a4107910681057105610354433c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed54e001c0020702f88f74d33fd4d30731d430816dd329c200f2f4816ca72cc200f2f421d001d023db3c520dba705470018e2e5f030ba7065309a8812710a9045301bc923020de5ca18152fd53b1bef2f451aaa1518aa05171a010ad108a074888913ee2705303948200ea609120e2061111060443135610020111120108c8e05f0bf2c0820809003cc85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da1176a908a401b6557080205009cb1f17cb1f15ca0013cb0f01fa0201fa0201fa02cccb3fc95442bb706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0055170a0054c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed540201200c140201200d120201660e10019bae4576a268690000c7147d206987fd007d007d007d00698fea00e87d207d00698398081d081c881c081b881b081a881a360d470a7d20408080eb802c816880b82a38002a3800142cf16d9e3650c00f000224019bade376a268690000c7147d206987fd007d007d007d00698fea00e87d207d00698398081d081c881c081b881b081a881a360d470a7d20408080eb802c816880b82a38002a3800142cf16d9e3650c011000223019bba5cded44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18130002280201201517019bbaff2ed44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18160018269170e125812710a827a904019bbb7cced44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18180002274094df3b');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initProviderContract_init_args({ $$type: 'ProviderContract_init_args', owner, commissionBps })(builder);
@@ -1174,12 +1125,16 @@ export const ProviderContract_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    8045: { message: "Resolve previous bet first" },
+    11191: { message: "Provider stake required" },
     11977: { message: "Amount > 0" },
     20824: { message: "Max 10000 (100%)" },
     21245: { message: "Insufficient stake" },
+    27815: { message: "No pending bet" },
+    28115: { message: "No stake" },
     35499: { message: "Only owner" },
-    43379: { message: "Provider must stake" },
     56646: { message: "Bet > 0" },
+    62748: { message: "Guess 1-6" },
 } as const
 
 export const ProviderContract_errors_backward = {
@@ -1219,12 +1174,16 @@ export const ProviderContract_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Resolve previous bet first": 8045,
+    "Provider stake required": 11191,
     "Amount > 0": 11977,
     "Max 10000 (100%)": 20824,
     "Insufficient stake": 21245,
+    "No pending bet": 27815,
+    "No stake": 28115,
     "Only owner": 35499,
-    "Provider must stake": 43379,
     "Bet > 0": 56646,
+    "Guess 1-6": 62748,
 } as const
 
 const ProviderContract_types: ABIType[] = [
@@ -1241,12 +1200,10 @@ const ProviderContract_types: ABIType[] = [
     {"name":"AddStake","header":16,"fields":[]},
     {"name":"WithdrawStake","header":17,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"SetCommission","header":18,"fields":[{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
-    {"name":"PlaceBet","header":1,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"commitment","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"RevealSeed","header":2,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"ClaimWin","header":5,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
-    {"name":"SlashStake","header":6,"fields":[{"name":"proofServerSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"proofNonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"proofSender","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"GameResult","header":32,"fields":[{"name":"outcome","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"multiplier","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"payout","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
-    {"name":"ProviderContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"stake","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalBets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalPayouts","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"gameCount","type":{"kind":"simple","type":"uint","optional":false,"format":32}}]},
+    {"name":"PlaceBet","header":1,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"RevealSeed","header":2,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"GameResult","header":32,"fields":[{"name":"outcome","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"win","type":{"kind":"simple","type":"bool","optional":false}},{"name":"multiplierBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"grossPayout","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"commissionTaken","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"netPayout","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"ProviderContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"stake","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalBets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalPayouts","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalCommission","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"gameCount","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"pendingSender","type":{"kind":"simple","type":"address","optional":false}},{"name":"pendingBetAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"pendingGuess","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
 ]
 
 const ProviderContract_opcodes = {
@@ -1255,14 +1212,13 @@ const ProviderContract_opcodes = {
     "SetCommission": 18,
     "PlaceBet": 1,
     "RevealSeed": 2,
-    "ClaimWin": 5,
-    "SlashStake": 6,
     "GameResult": 32,
 }
 
 const ProviderContract_getters: ABIGetter[] = [
     {"name":"getStake","methodId":128972,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"getCommission","methodId":91597,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"getTotalCommission","methodId":70794,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"getTotalGames","methodId":72646,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"getRtp","methodId":110578,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
@@ -1270,6 +1226,7 @@ const ProviderContract_getters: ABIGetter[] = [
 export const ProviderContract_getterMapping: { [key: string]: string } = {
     'getStake': 'getGetStake',
     'getCommission': 'getGetCommission',
+    'getTotalCommission': 'getGetTotalCommission',
     'getTotalGames': 'getGetTotalGames',
     'getRtp': 'getGetRtp',
 }
@@ -1351,6 +1308,13 @@ export class ProviderContract implements Contract {
     async getGetCommission(provider: ContractProvider) {
         const builder = new TupleBuilder();
         const source = (await provider.get('getCommission', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getGetTotalCommission(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('getTotalCommission', builder.build())).stack;
         const result = source.readBigNumber();
         return result;
     }

@@ -1,7 +1,8 @@
 {
   "network": "testnet",
-  "providerAddress": "0:9581c0c315b5c956cc713aeccedc5678b288e3ca299e68999b088cb25b62b4e5",
-  "diceGameAddress": "0:0c0c1aac9d6fe94274329da91657c877a1c0bb778481710bdf89d0be977e77a7",
+  "providerAddress": "0:208a6a0e4e5e6ae53d3f25e5d58a04371580090374f22a09f293d7d84d9ba3c0",
+  "diceGameAddress": "0:d6abb8922d3be36ea58aec77f9d24b3936c73c0c49ec2dec69c12bdd09b5b440",
   "commissionBps": 500,
-  "stake": "1 TON"
+  "stake": "1 TON",
+  "deployedAt": "2026-07-20T17:07:41.733Z"
 }

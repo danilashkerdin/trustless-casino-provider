@@ -1,6 +1,6 @@
 # Tact compilation report
 Contract: DiceGame
-BoC Size: 487 bytes
+BoC Size: 263 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 14
@@ -46,20 +46,20 @@ TL-B: `_ hash:Maybe int257 = BasechainAddress`
 Signature: `BasechainAddress{hash:Maybe int257}`
 
 ### BetDice
-TL-B: `bet_dice#00000021 nonce:uint64 guess:uint8 clientSeed:^cell commitment:^cell serverSeedHash:^cell = BetDice`
-Signature: `BetDice{nonce:uint64,guess:uint8,clientSeed:^cell,commitment:^cell,serverSeedHash:^cell}`
+TL-B: `bet_dice#00000021 nonce:uint64 guess:uint8 clientSeed:^cell serverSeedHash:^cell = BetDice`
+Signature: `BetDice{nonce:uint64,guess:uint8,clientSeed:^cell,serverSeedHash:^cell}`
 
 ### RevealDice
-TL-B: `reveal_dice#00000022 nonce:uint64 serverSeed:^cell guess:uint8 = RevealDice`
-Signature: `RevealDice{nonce:uint64,serverSeed:^cell,guess:uint8}`
+TL-B: `reveal_dice#00000022 nonce:uint64 serverSeed:^cell guess:uint8 clientSeed:^cell = RevealDice`
+Signature: `RevealDice{nonce:uint64,serverSeed:^cell,guess:uint8,clientSeed:^cell}`
 
 ### DiceResult
-TL-B: `dice_result#00000024 diceRoll:uint8 serverSeed:^cell nonce:uint64 = DiceResult`
-Signature: `DiceResult{diceRoll:uint8,serverSeed:^cell,nonce:uint64}`
+TL-B: `dice_result#00000024 diceRoll:uint8 win:bool payoutMultiplier:uint16 serverSeedHash:^cell nonce:uint64 = DiceResult`
+Signature: `DiceResult{diceRoll:uint8,win:bool,payoutMultiplier:uint16,serverSeedHash:^cell,nonce:uint64}`
 
 ### DiceGame$Data
-TL-B: `_ minBet:coins maxBet:coins houseEdgeBps:uint16 state:uint8 totalBets:coins totalPayouts:coins pendingNonce:uint64 pendingBet:coins pendingGuess:uint8 = DiceGame`
-Signature: `DiceGame{minBet:coins,maxBet:coins,houseEdgeBps:uint16,state:uint8,totalBets:coins,totalPayouts:coins,pendingNonce:uint64,pendingBet:coins,pendingGuess:uint8}`
+TL-B: `_ owner:address = DiceGame`
+Signature: `DiceGame{owner:address}`
 
 ## Get methods
 Total get methods: 0
@@ -101,13 +101,7 @@ Total get methods: 0
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
-* 20685: Min bet
-* 27815: No pending bet
-* 34905: 1-6 only
-* 44244: Nonce mismatch
-* 46897: Max bet
-* 47276: Reveal previous bet first
-* 59457: Paused
+* 32793: Only provider
 
 ## Trait inheritance diagram
 

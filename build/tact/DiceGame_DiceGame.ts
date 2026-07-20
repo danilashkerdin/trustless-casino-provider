@@ -614,7 +614,6 @@ export type BetDice = {
     nonce: bigint;
     guess: bigint;
     clientSeed: Cell;
-    commitment: Cell;
     serverSeedHash: Cell;
 }
 
@@ -625,7 +624,6 @@ export function storeBetDice(src: BetDice) {
         b_0.storeUint(src.nonce, 64);
         b_0.storeUint(src.guess, 8);
         b_0.storeRef(src.clientSeed);
-        b_0.storeRef(src.commitment);
         b_0.storeRef(src.serverSeedHash);
     };
 }
@@ -636,27 +634,24 @@ export function loadBetDice(slice: Slice) {
     const _nonce = sc_0.loadUintBig(64);
     const _guess = sc_0.loadUintBig(8);
     const _clientSeed = sc_0.loadRef();
-    const _commitment = sc_0.loadRef();
     const _serverSeedHash = sc_0.loadRef();
-    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function loadTupleBetDice(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _commitment = source.readCell();
     const _serverSeedHash = source.readCell();
-    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function loadGetterTupleBetDice(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _commitment = source.readCell();
     const _serverSeedHash = source.readCell();
-    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, commitment: _commitment, serverSeedHash: _serverSeedHash };
+    return { $$type: 'BetDice' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
 export function storeTupleBetDice(source: BetDice) {
@@ -664,7 +659,6 @@ export function storeTupleBetDice(source: BetDice) {
     builder.writeNumber(source.nonce);
     builder.writeNumber(source.guess);
     builder.writeCell(source.clientSeed);
-    builder.writeCell(source.commitment);
     builder.writeCell(source.serverSeedHash);
     return builder.build();
 }
@@ -685,6 +679,7 @@ export type RevealDice = {
     nonce: bigint;
     serverSeed: Cell;
     guess: bigint;
+    clientSeed: Cell;
 }
 
 export function storeRevealDice(src: RevealDice) {
@@ -694,6 +689,7 @@ export function storeRevealDice(src: RevealDice) {
         b_0.storeUint(src.nonce, 64);
         b_0.storeRef(src.serverSeed);
         b_0.storeUint(src.guess, 8);
+        b_0.storeRef(src.clientSeed);
     };
 }
 
@@ -703,21 +699,24 @@ export function loadRevealDice(slice: Slice) {
     const _nonce = sc_0.loadUintBig(64);
     const _serverSeed = sc_0.loadRef();
     const _guess = sc_0.loadUintBig(8);
-    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess };
+    const _clientSeed = sc_0.loadRef();
+    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadTupleRevealDice(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _serverSeed = source.readCell();
     const _guess = source.readBigNumber();
-    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess };
+    const _clientSeed = source.readCell();
+    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadGetterTupleRevealDice(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _serverSeed = source.readCell();
     const _guess = source.readBigNumber();
-    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess };
+    const _clientSeed = source.readCell();
+    return { $$type: 'RevealDice' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function storeTupleRevealDice(source: RevealDice) {
@@ -725,6 +724,7 @@ export function storeTupleRevealDice(source: RevealDice) {
     builder.writeNumber(source.nonce);
     builder.writeCell(source.serverSeed);
     builder.writeNumber(source.guess);
+    builder.writeCell(source.clientSeed);
     return builder.build();
 }
 
@@ -742,7 +742,9 @@ export function dictValueParserRevealDice(): DictionaryValue<RevealDice> {
 export type DiceResult = {
     $$type: 'DiceResult';
     diceRoll: bigint;
-    serverSeed: Cell;
+    win: boolean;
+    payoutMultiplier: bigint;
+    serverSeedHash: Cell;
     nonce: bigint;
 }
 
@@ -751,7 +753,9 @@ export function storeDiceResult(src: DiceResult) {
         const b_0 = builder;
         b_0.storeUint(36, 32);
         b_0.storeUint(src.diceRoll, 8);
-        b_0.storeRef(src.serverSeed);
+        b_0.storeBit(src.win);
+        b_0.storeUint(src.payoutMultiplier, 16);
+        b_0.storeRef(src.serverSeedHash);
         b_0.storeUint(src.nonce, 64);
     };
 }
@@ -760,29 +764,37 @@ export function loadDiceResult(slice: Slice) {
     const sc_0 = slice;
     if (sc_0.loadUint(32) !== 36) { throw Error('Invalid prefix'); }
     const _diceRoll = sc_0.loadUintBig(8);
-    const _serverSeed = sc_0.loadRef();
+    const _win = sc_0.loadBit();
+    const _payoutMultiplier = sc_0.loadUintBig(16);
+    const _serverSeedHash = sc_0.loadRef();
     const _nonce = sc_0.loadUintBig(64);
-    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, win: _win, payoutMultiplier: _payoutMultiplier, serverSeedHash: _serverSeedHash, nonce: _nonce };
 }
 
 export function loadTupleDiceResult(source: TupleReader) {
     const _diceRoll = source.readBigNumber();
-    const _serverSeed = source.readCell();
+    const _win = source.readBoolean();
+    const _payoutMultiplier = source.readBigNumber();
+    const _serverSeedHash = source.readCell();
     const _nonce = source.readBigNumber();
-    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, win: _win, payoutMultiplier: _payoutMultiplier, serverSeedHash: _serverSeedHash, nonce: _nonce };
 }
 
 export function loadGetterTupleDiceResult(source: TupleReader) {
     const _diceRoll = source.readBigNumber();
-    const _serverSeed = source.readCell();
+    const _win = source.readBoolean();
+    const _payoutMultiplier = source.readBigNumber();
+    const _serverSeedHash = source.readCell();
     const _nonce = source.readBigNumber();
-    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, serverSeed: _serverSeed, nonce: _nonce };
+    return { $$type: 'DiceResult' as const, diceRoll: _diceRoll, win: _win, payoutMultiplier: _payoutMultiplier, serverSeedHash: _serverSeedHash, nonce: _nonce };
 }
 
 export function storeTupleDiceResult(source: DiceResult) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.diceRoll);
-    builder.writeCell(source.serverSeed);
+    builder.writeBoolean(source.win);
+    builder.writeNumber(source.payoutMultiplier);
+    builder.writeCell(source.serverSeedHash);
     builder.writeNumber(source.nonce);
     return builder.build();
 }
@@ -800,83 +812,35 @@ export function dictValueParserDiceResult(): DictionaryValue<DiceResult> {
 
 export type DiceGame$Data = {
     $$type: 'DiceGame$Data';
-    minBet: bigint;
-    maxBet: bigint;
-    houseEdgeBps: bigint;
-    state: bigint;
-    totalBets: bigint;
-    totalPayouts: bigint;
-    pendingNonce: bigint;
-    pendingBet: bigint;
-    pendingGuess: bigint;
+    owner: Address;
 }
 
 export function storeDiceGame$Data(src: DiceGame$Data) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeCoins(src.minBet);
-        b_0.storeCoins(src.maxBet);
-        b_0.storeUint(src.houseEdgeBps, 16);
-        b_0.storeUint(src.state, 8);
-        b_0.storeCoins(src.totalBets);
-        b_0.storeCoins(src.totalPayouts);
-        b_0.storeUint(src.pendingNonce, 64);
-        b_0.storeCoins(src.pendingBet);
-        b_0.storeUint(src.pendingGuess, 8);
+        b_0.storeAddress(src.owner);
     };
 }
 
 export function loadDiceGame$Data(slice: Slice) {
     const sc_0 = slice;
-    const _minBet = sc_0.loadCoins();
-    const _maxBet = sc_0.loadCoins();
-    const _houseEdgeBps = sc_0.loadUintBig(16);
-    const _state = sc_0.loadUintBig(8);
-    const _totalBets = sc_0.loadCoins();
-    const _totalPayouts = sc_0.loadCoins();
-    const _pendingNonce = sc_0.loadUintBig(64);
-    const _pendingBet = sc_0.loadCoins();
-    const _pendingGuess = sc_0.loadUintBig(8);
-    return { $$type: 'DiceGame$Data' as const, minBet: _minBet, maxBet: _maxBet, houseEdgeBps: _houseEdgeBps, state: _state, totalBets: _totalBets, totalPayouts: _totalPayouts, pendingNonce: _pendingNonce, pendingBet: _pendingBet, pendingGuess: _pendingGuess };
+    const _owner = sc_0.loadAddress();
+    return { $$type: 'DiceGame$Data' as const, owner: _owner };
 }
 
 export function loadTupleDiceGame$Data(source: TupleReader) {
-    const _minBet = source.readBigNumber();
-    const _maxBet = source.readBigNumber();
-    const _houseEdgeBps = source.readBigNumber();
-    const _state = source.readBigNumber();
-    const _totalBets = source.readBigNumber();
-    const _totalPayouts = source.readBigNumber();
-    const _pendingNonce = source.readBigNumber();
-    const _pendingBet = source.readBigNumber();
-    const _pendingGuess = source.readBigNumber();
-    return { $$type: 'DiceGame$Data' as const, minBet: _minBet, maxBet: _maxBet, houseEdgeBps: _houseEdgeBps, state: _state, totalBets: _totalBets, totalPayouts: _totalPayouts, pendingNonce: _pendingNonce, pendingBet: _pendingBet, pendingGuess: _pendingGuess };
+    const _owner = source.readAddress();
+    return { $$type: 'DiceGame$Data' as const, owner: _owner };
 }
 
 export function loadGetterTupleDiceGame$Data(source: TupleReader) {
-    const _minBet = source.readBigNumber();
-    const _maxBet = source.readBigNumber();
-    const _houseEdgeBps = source.readBigNumber();
-    const _state = source.readBigNumber();
-    const _totalBets = source.readBigNumber();
-    const _totalPayouts = source.readBigNumber();
-    const _pendingNonce = source.readBigNumber();
-    const _pendingBet = source.readBigNumber();
-    const _pendingGuess = source.readBigNumber();
-    return { $$type: 'DiceGame$Data' as const, minBet: _minBet, maxBet: _maxBet, houseEdgeBps: _houseEdgeBps, state: _state, totalBets: _totalBets, totalPayouts: _totalPayouts, pendingNonce: _pendingNonce, pendingBet: _pendingBet, pendingGuess: _pendingGuess };
+    const _owner = source.readAddress();
+    return { $$type: 'DiceGame$Data' as const, owner: _owner };
 }
 
 export function storeTupleDiceGame$Data(source: DiceGame$Data) {
     const builder = new TupleBuilder();
-    builder.writeNumber(source.minBet);
-    builder.writeNumber(source.maxBet);
-    builder.writeNumber(source.houseEdgeBps);
-    builder.writeNumber(source.state);
-    builder.writeNumber(source.totalBets);
-    builder.writeNumber(source.totalPayouts);
-    builder.writeNumber(source.pendingNonce);
-    builder.writeNumber(source.pendingBet);
-    builder.writeNumber(source.pendingGuess);
+    builder.writeAddress(source.owner);
     return builder.build();
 }
 
@@ -893,19 +857,21 @@ export function dictValueParserDiceGame$Data(): DictionaryValue<DiceGame$Data> {
 
  type DiceGame_init_args = {
     $$type: 'DiceGame_init_args';
+    owner: Address;
 }
 
 function initDiceGame_init_args(src: DiceGame_init_args) {
     return (builder: Builder) => {
         const b_0 = builder;
+        b_0.storeAddress(src.owner);
     };
 }
 
-async function DiceGame_init() {
-    const __code = Cell.fromHex('b5ee9c72410207010001db000114ff00f4a413f4bcf2c80b0102d8d301d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e16fa00fa00d30fd307fa00fa00d33ffa00d30755806c198e1730821005f5e1008218174876e8008101f4705470005300e23009925f09e007d70d1ff2e08221c021e30201c022e3025f09f2c082020300ec313807d33fd307308200e84124c000f2f48200885921c2009321c1079170e2f2f48200b8ac08c00018f2f4f8416f24135f038150cd5317bef2f48200b7315316bbf2f45122a01068105710461035045023c87f01ca0055805098fa025006fa0214cb0f12cb0701fa0201fa02cb3f58fa02cb07c9ed5403fcd33fd4d30730228200acd40bba1af2f4816ca72ac200f2f420d021d023db3c20700bba8e113909a70681271026a1a8812710a9040809913ae2705460052ba0f8424d45c8552080245004cb1f12cb07cccb3fc943a0706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c901040506003cc85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da1176a908a4001a58cf8680cf8480f400f400cf810064fb001068105710461035441359c87f01ca0055805098fa025006fa0214cb0f12cb0701fa0201fa02cb3f58fa02cb07c9ed544a1aa5da');
+async function DiceGame_init(owner: Address) {
+    const __code = Cell.fromHex('b5ee9c724101050100fc000114ff00f4a413f4bcf2c80b01017ad301d072d721d200d200fa4021103450666f04f86102f862ed44d0d2000194fa40013195fa400101d1e202915be0d70d1ff2e08201c022e3025bf2c0820202fcd33fd4d307d43082008019f84226c705f2f422d001d024db3c5202ba702195308200ea60def84270c806d016cf16c95006c8554080245006cb1f14cb0712ca00cb0fcccb3fc9706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000304003cc85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da1176a908a40016c87f01ca000101cec9ed5441ab67ea');
     const builder = beginCell();
     builder.storeUint(0, 1);
-    initDiceGame_init_args({ $$type: 'DiceGame_init_args' })(builder);
+    initDiceGame_init_args({ $$type: 'DiceGame_init_args', owner })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
@@ -947,13 +913,7 @@ export const DiceGame_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
-    20685: { message: "Min bet" },
-    27815: { message: "No pending bet" },
-    34905: { message: "1-6 only" },
-    44244: { message: "Nonce mismatch" },
-    46897: { message: "Max bet" },
-    47276: { message: "Reveal previous bet first" },
-    59457: { message: "Paused" },
+    32793: { message: "Only provider" },
 } as const
 
 export const DiceGame_errors_backward = {
@@ -993,13 +953,7 @@ export const DiceGame_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
-    "Min bet": 20685,
-    "No pending bet": 27815,
-    "1-6 only": 34905,
-    "Nonce mismatch": 44244,
-    "Max bet": 46897,
-    "Reveal previous bet first": 47276,
-    "Paused": 59457,
+    "Only provider": 32793,
 } as const
 
 const DiceGame_types: ABIType[] = [
@@ -1013,10 +967,10 @@ const DiceGame_types: ABIType[] = [
     {"name":"StdAddress","header":null,"fields":[{"name":"workchain","type":{"kind":"simple","type":"int","optional":false,"format":8}},{"name":"address","type":{"kind":"simple","type":"uint","optional":false,"format":256}}]},
     {"name":"VarAddress","header":null,"fields":[{"name":"workchain","type":{"kind":"simple","type":"int","optional":false,"format":32}},{"name":"address","type":{"kind":"simple","type":"slice","optional":false}}]},
     {"name":"BasechainAddress","header":null,"fields":[{"name":"hash","type":{"kind":"simple","type":"int","optional":true,"format":257}}]},
-    {"name":"BetDice","header":33,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"commitment","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"RevealDice","header":34,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
-    {"name":"DiceResult","header":36,"fields":[{"name":"diceRoll","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
-    {"name":"DiceGame$Data","header":null,"fields":[{"name":"minBet","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"maxBet","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"houseEdgeBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"state","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"totalBets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalPayouts","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"pendingNonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"pendingBet","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"pendingGuess","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
+    {"name":"BetDice","header":33,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"RevealDice","header":34,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"DiceResult","header":36,"fields":[{"name":"diceRoll","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"win","type":{"kind":"simple","type":"bool","optional":false}},{"name":"payoutMultiplier","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}},{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"DiceGame$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}]},
 ]
 
 const DiceGame_opcodes = {
@@ -1032,7 +986,6 @@ export const DiceGame_getterMapping: { [key: string]: string } = {
 }
 
 const DiceGame_receivers: ABIReceiver[] = [
-    {"receiver":"internal","message":{"kind":"typed","type":"BetDice"}},
     {"receiver":"internal","message":{"kind":"typed","type":"RevealDice"}},
 ]
 
@@ -1043,12 +996,12 @@ export class DiceGame implements Contract {
     public static readonly errors = DiceGame_errors_backward;
     public static readonly opcodes = DiceGame_opcodes;
     
-    static async init() {
-        return await DiceGame_init();
+    static async init(owner: Address) {
+        return await DiceGame_init(owner);
     }
     
-    static async fromInit() {
-        const __gen_init = await DiceGame_init();
+    static async fromInit(owner: Address) {
+        const __gen_init = await DiceGame_init(owner);
         const address = contractAddress(0, __gen_init);
         return new DiceGame(address, __gen_init);
     }
@@ -1071,12 +1024,9 @@ export class DiceGame implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: BetDice | RevealDice) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: RevealDice) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'BetDice') {
-            body = beginCell().store(storeBetDice(message)).endCell();
-        }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'RevealDice') {
             body = beginCell().store(storeRevealDice(message)).endCell();
         }

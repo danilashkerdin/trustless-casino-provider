@@ -19,28 +19,6 @@ function loadCode(name: string): Cell {
 
 function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
-async function rpc(method: string, params: any): Promise<any> {
-  for (let i = 0; i < 50; i++) {
-    try {
-      const res = await fetch(RPC, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
-        body: JSON.stringify({ jsonrpc: '2.0', method, params, id: 1 }),
-      });
-      const data: any = await res.json();
-      if (data.ok) return data.result;
-      if (data.error?.includes('limit') || data?.result?.includes('limit') || res.status === 429) throw new Error('rate');
-      throw new Error(data.error || JSON.stringify(data));
-    } catch (e: any) {
-      const isRate = e.message?.includes('rate') || e.message?.includes('429');
-      if (i === 49 || !isRate) throw e;
-      const w = Math.min(5000 * (i + 1), 60000);
-      console.log(`   ⏳ retry ${i + 1}/50 in ${w / 1000}s...`);
-      await sleep(w);
-    }
-  }
-}
-
 async function main() {
   console.log('╔══════════════════════════════════════╗');
   console.log('║  Trustless Casino — RELEASE DEPLOY   ║');
@@ -61,17 +39,40 @@ async function main() {
   const client = new TonClient({ endpoint: RPC, apiKey: API_KEY });
   const opened = client.open(wallet);
 
-  // === 1. ProviderContract ===
+  // === Step 1: Deploy DiceGame (stateless, owner = provider addr) ===
+  console.log('\n🎲 Deploying DiceGame (stateless)...');
+  const diceCode = loadCode('DiceGame_DiceGame');
+  const diceData = beginCell()
+    .storeAddress(wallet.address) // owner = provider (wallet)
+  .endCell();
+  const diceAddr = contractAddress(0, { code: diceCode, data: diceData });
+  console.log(`   Address: ${diceAddr.toRawString()}`);
+
+  let state = await rpc('getAddressInformation', { address: diceAddr.toRawString() });
+  if (state.state !== 'uninitialized') {
+    console.log('   ✅ Already deployed');
+  } else {
+    const seqno = await opened.getSeqno();
+    await opened.sendTransfer({
+      seqno, secretKey: key.secretKey,
+      sendMode: SendMode.PAY_GAS_SEPARATELY,
+      messages: [internal({ to: diceAddr, value: 50000000n, init: { code: diceCode, data: diceData }, body: new Cell() })],
+    });
+    console.log('   ✅ Deploy sent');
+    await sleep(15000);
+  }
+
+  // === Step 2: Deploy ProviderContract (new: knows diceGame) ===
   console.log('\n🚀 Deploying ProviderContract...');
   const provCode = loadCode('ProviderContract_ProviderContract');
   const provData = beginCell()
-    .storeAddress(wallet.address)
-    .storeUint(config.commissionBps, 16)
+    .storeAddress(wallet.address) // owner
+    .storeUint(config.commissionBps, 16) // commissionBps
   .endCell();
   const provAddr = contractAddress(0, { code: provCode, data: provData });
   console.log(`   Address: ${provAddr.toRawString()}`);
 
-  let state = await rpc('getAddressInformation', { address: provAddr.toRawString() });
+  state = await rpc('getAddressInformation', { address: provAddr.toRawString() });
   if (state.state !== 'uninitialized') {
     console.log('   ✅ Already deployed');
   } else {
@@ -81,12 +82,11 @@ async function main() {
       sendMode: SendMode.PAY_GAS_SEPARATELY,
       messages: [internal({ to: provAddr, value: 50000000n, init: { code: provCode, data: provData }, body: new Cell() })],
     });
-    console.log('   ✅ Deploy request sent');
-    console.log('   ⏳ Waiting 30s for deployment...');
-    await sleep(30000);
+    console.log('   ✅ Deploy sent');
+    await sleep(15000);
   }
 
-  // === 2. Stake ===
+  // === Step 3: Stake ===
   console.log(`\n💰 Adding stake: ${config.providerStake} TON...`);
   const bodyStake = beginCell().storeUint(0x10, 32).storeUint(0, 64).endCell();
   const seqno = await opened.getSeqno();
@@ -96,41 +96,12 @@ async function main() {
     messages: [internal({ to: provAddr, value: BigInt(parseFloat(config.providerStake) * 1e9), body: bodyStake })],
   });
   console.log('   ✅ Stake sent');
-  await sleep(10000);
-
-  // === 3. DiceGame ===
-  if (config.games.dice.enabled) {
-    console.log('\n🎲 Deploying DiceGame...');
-    const diceCode = loadCode('DiceGame_DiceGame');
-    const diceData = beginCell()
-      .storeCoins(100000000n).storeCoins(100000000000n).storeUint(500, 16).storeUint(0, 8)
-    .endCell();
-    const diceAddr = contractAddress(0, { code: diceCode, data: diceData });
-    console.log(`   Address: ${diceAddr.toRawString()}`);
-
-    state = await rpc('getAddressInformation', { address: diceAddr.toRawString() });
-    if (state.state !== 'uninitialized') {
-      console.log('   ✅ Already deployed');
-    } else {
-      const seqno2 = await opened.getSeqno();
-      await opened.sendTransfer({
-        seqno: seqno2, secretKey: key.secretKey,
-        sendMode: SendMode.PAY_GAS_SEPARATELY,
-        messages: [internal({ to: diceAddr, value: 50000000n, init: { code: diceCode, data: diceData }, body: new Cell() })],
-      });
-      console.log('   ✅ Deploy request sent');
-    }
-  }
 
   // === Save ===
   const dep = {
     network: 'testnet',
     providerAddress: provAddr.toRawString(),
-    diceGameAddress: (() => {
-      const dc = loadCode('DiceGame_DiceGame');
-      const dd = beginCell().storeCoins(100000000n).storeCoins(100000000000n).storeUint(500, 16).storeUint(0, 8).endCell();
-      return contractAddress(0, { code: dc, data: dd }).toRawString();
-    })(),
+    diceGameAddress: diceAddr.toRawString(),
     commissionBps: config.commissionBps,
     stake: config.providerStake + ' TON',
     deployedAt: new Date().toISOString(),
@@ -142,9 +113,32 @@ async function main() {
   console.log('='.repeat(55));
   console.log('\n  ProviderContract: ' + dep.providerAddress);
   console.log('  DiceGame:         ' + dep.diceGameAddress);
-  console.log('  Check in 1-2 min:');
+  console.log('  Commission:       ' + dep.commissionBps + ' bps (' + (dep.commissionBps / 100) + '%)');
+  console.log('\n  Check:');
   console.log('    https://testnet.tonviewer.com/' + dep.providerAddress);
   console.log('    https://testnet.tonviewer.com/' + dep.diceGameAddress);
+}
+
+async function rpc(method: string, params: any): Promise<any> {
+  for (let i = 0; i < 50; i++) {
+    try {
+      const res = await fetch(RPC, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
+        body: JSON.stringify({ jsonrpc: '2.0', method, params, id: 1 }),
+      });
+      const data: any = await res.json();
+      if (data.ok) return data.result;
+      if (data.error?.includes('limit') || data?.result?.includes('limit') || res.status === 429) throw new Error('rate');
+      throw new Error(data.error || JSON.stringify(data));
+    } catch (e: any) {
+      const isRate = e.message?.includes('rate') || e.message?.includes('429');
+      if (i === 49 || !isRate) throw e;
+      const w = Math.min(5000 * (i + 1), 60000);
+      console.log(`   ⏳ retry ${i + 1}/50 in ${w / 1000}s...`);
+      await sleep(w);
+    }
+  }
 }
 
 main().catch(err => { console.error('\n❌', err.message || err); process.exit(1); });
