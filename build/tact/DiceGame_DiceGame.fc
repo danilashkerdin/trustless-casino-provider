@@ -1,0 +1,357 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; DiceGame_DiceGame.headers.fc
+;;
+;; Header files for DiceGame
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $DiceResult$_store
+builder $DiceResult$_store(builder build_0, (int, cell, int) v) inline;
+
+;; $DiceResult$_store_cell
+cell $DiceResult$_store_cell((int, cell, int) v, builder b) inline;
+
+;; $DiceGame$_store
+builder $DiceGame$_store(builder build_0, (int, int, int, int, int, int, int, int, int) v) inline;
+
+;; $DiceGame$_load
+(slice, ((int, int, int, int, int, int, int, int, int))) $DiceGame$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $DiceGame$_contract_init
+(int, int, int, int, int, int, int, int, int) $DiceGame$_contract_init() impure inline;
+
+;; $DiceGame$_contract_load
+(int, int, int, int, int, int, int, int, int) $DiceGame$_contract_load() impure inline;
+
+;; $DiceGame$_contract_store
+() $DiceGame$_contract_store((int, int, int, int, int, int, int, int, int) v) impure inline;
+
+;; $Cell$_fun_asSlice
+slice $Cell$_fun_asSlice(cell $self) impure inline;
+
+;; $global_diceRoll
+int $global_diceRoll(slice $serverSeed, slice $clientSeed, int $nonce) impure inline_ref;
+
+;; $SendParameters$_constructor_to_value_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_body(slice $to, int $value, cell $body) inline;
+
+;; $DiceResult$_constructor_diceRoll_serverSeed_nonce
+((int, cell, int)) $DiceResult$_constructor_diceRoll_serverSeed_nonce(int $diceRoll, cell $serverSeed, int $nonce) inline;
+
+
+;; DiceGame_DiceGame.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+int __tact_sha256(slice data) asm """
+
+            <{
+                <{ DUP SREFS }> PUSHCONT
+                <{ LDREFRTOS }> PUSHCONT
+                WHILE
+                DEPTH
+                HASHEXT_SHA256
+            }> PUSHCONT
+            1 1 CALLXARGS
+
+""";
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Cell$_fun_asSlice(cell $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($self);
+}
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+builder $Builder$_fun_storeSlice(builder $self, slice $slice) impure asm """
+    STSLICER
+""";
+
+;; DiceGame_DiceGame.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_body(slice $to, int $value, cell $body) inline {
+    return (0, $body, null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: DiceResult
+;; Header: 0x00000024
+;; TLB: dice_result#00000024 diceRoll:uint8 serverSeed:^cell nonce:uint64 = DiceResult
+;;
+
+builder $DiceResult$_store(builder build_0, (int, cell, int) v) inline {
+    var (v'diceRoll, v'serverSeed, v'nonce) = v;
+    build_0 = store_uint(build_0, 36, 32);
+    build_0 = build_0.store_uint(v'diceRoll, 8);
+    build_0 = build_0.store_ref(v'serverSeed);
+    build_0 = build_0.store_uint(v'nonce, 64);
+    return build_0;
+}
+
+cell $DiceResult$_store_cell((int, cell, int) v, builder b) inline {
+    return $DiceResult$_store(b, v).end_cell();
+}
+
+((int, cell, int)) $DiceResult$_constructor_diceRoll_serverSeed_nonce(int $diceRoll, cell $serverSeed, int $nonce) inline {
+    return ($diceRoll, $serverSeed, $nonce);
+}
+
+;;
+;; Type: DiceGame
+;; TLB: _ minBet:coins maxBet:coins houseEdgeBps:uint16 state:uint8 totalBets:coins totalPayouts:coins pendingNonce:uint64 pendingBet:coins pendingGuess:uint8 = DiceGame
+;;
+
+builder $DiceGame$_store(builder build_0, (int, int, int, int, int, int, int, int, int) v) inline {
+    var (v'minBet, v'maxBet, v'houseEdgeBps, v'state, v'totalBets, v'totalPayouts, v'pendingNonce, v'pendingBet, v'pendingGuess) = v;
+    build_0 = build_0.store_varuint16(v'minBet);
+    build_0 = build_0.store_varuint16(v'maxBet);
+    build_0 = build_0.store_uint(v'houseEdgeBps, 16);
+    build_0 = build_0.store_uint(v'state, 8);
+    build_0 = build_0.store_varuint16(v'totalBets);
+    build_0 = build_0.store_varuint16(v'totalPayouts);
+    build_0 = build_0.store_uint(v'pendingNonce, 64);
+    build_0 = build_0.store_varuint16(v'pendingBet);
+    build_0 = build_0.store_uint(v'pendingGuess, 8);
+    return build_0;
+}
+
+(slice, ((int, int, int, int, int, int, int, int, int))) $DiceGame$_load(slice sc_0) inline {
+    var v'minBet = sc_0~load_varuint16();
+    var v'maxBet = sc_0~load_varuint16();
+    var v'houseEdgeBps = sc_0~load_uint(16);
+    var v'state = sc_0~load_uint(8);
+    var v'totalBets = sc_0~load_varuint16();
+    var v'totalPayouts = sc_0~load_varuint16();
+    var v'pendingNonce = sc_0~load_uint(64);
+    var v'pendingBet = sc_0~load_varuint16();
+    var v'pendingGuess = sc_0~load_uint(8);
+    return (sc_0, (v'minBet, v'maxBet, v'houseEdgeBps, v'state, v'totalBets, v'totalPayouts, v'pendingNonce, v'pendingBet, v'pendingGuess));
+}
+
+(int, int, int, int, int, int, int, int, int) $DiceGame$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$DiceGame$_load();
+    }
+    else {
+        return $DiceGame$_contract_init();
+    }
+}
+
+() $DiceGame$_contract_store((int, int, int, int, int, int, int, int, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $DiceGame$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract DiceGame functions
+;;
+
+(int, int, int, int, int, int, int, int, int) $DiceGame$_contract_init() impure inline {
+    var (($self'minBet, $self'maxBet, $self'houseEdgeBps, $self'state, $self'totalBets, $self'totalPayouts, $self'pendingNonce, $self'pendingBet, $self'pendingGuess)) = (100000000, 100000000000, 500, 0, 0, 0, 0, 0, 0);
+    return ($self'minBet, $self'maxBet, $self'houseEdgeBps, $self'state, $self'totalBets, $self'totalPayouts, $self'pendingNonce, $self'pendingBet, $self'pendingGuess);
+}
+
+int $global_diceRoll(slice $serverSeed, slice $clientSeed, int $nonce) impure inline_ref {
+    return ((__tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($Builder$_fun_storeSlice($Builder$_fun_storeSlice($global_beginCell(), $serverSeed), $clientSeed), $nonce, 64)))) % 6) + 1);
+}
+
+;;
+;; Get methods of a Contract DiceGame
+;;
+
+;;
+;; Routing of a Contract DiceGame
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'minBet, $self'maxBet, $self'houseEdgeBps, $self'state, $self'totalBets, $self'totalPayouts, $self'pendingNonce, $self'pendingBet, $self'pendingGuess) = $DiceGame$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive BetDice message
+    if (op == 0x21) {
+        var $msg'nonce = in_msg~load_uint(64);
+        var $msg'guess = in_msg~load_uint(8);
+        var $msg'clientSeed = in_msg~load_ref();
+        var $msg'commitment = in_msg~load_ref();
+        var $msg'serverSeedHash = in_msg~load_ref();
+        throw_unless(59457, ($self'state == 0));
+        throw_unless(34905, ( (($msg'guess >= 1)) ? (($msg'guess <= 6)) : (false) ));
+        throw_unless(47276, ($self'pendingNonce == 0));
+        int $betValue = $Context$_get_value(__tact_context_get());
+        throw_unless(20685, ($betValue >= $self'minBet));
+        throw_unless(46897, ($betValue <= $self'maxBet));
+        $self'pendingNonce = $msg'nonce;
+        $self'pendingBet = $betValue;
+        $self'pendingGuess = $msg'guess;
+        $self'totalBets = ($self'totalBets + $betValue);
+        $DiceGame$_contract_store(($self'minBet, $self'maxBet, $self'houseEdgeBps, $self'state, $self'totalBets, $self'totalPayouts, $self'pendingNonce, $self'pendingBet, $self'pendingGuess));
+        return ();
+    }
+    
+    ;; Receive RevealDice message
+    if (op == 0x22) {
+        var $msg'nonce = in_msg~load_uint(64);
+        var $msg'serverSeed = in_msg~load_ref();
+        var $msg'guess = in_msg~load_uint(8);
+        throw_unless(44244, ($msg'nonce == $self'pendingNonce));
+        throw_unless(27815, ($self'pendingBet > 0));
+        int $roll = $global_diceRoll($Cell$_fun_beginParse($msg'serverSeed), $Cell$_fun_beginParse($msg'serverSeed), $msg'nonce);
+        int $payout = 0;
+        if (($roll == $msg'guess)) {
+            $payout = ($self'pendingBet * 6);
+            $payout = (($payout * (10000 - $self'houseEdgeBps)) / 10000);
+        }
+        $self'pendingNonce = 0;
+        $self'pendingBet = 0;
+        $self'pendingGuess = 0;
+        $self'totalPayouts = ($self'totalPayouts + $payout);
+        $global_send($SendParameters$_constructor_to_value_body(__tact_context_get_sender(), $payout, $DiceResult$_store_cell($DiceResult$_constructor_diceRoll_serverSeed_nonce($roll, $msg'serverSeed, $msg'nonce), begin_cell())));
+        $DiceGame$_contract_store(($self'minBet, $self'maxBet, $self'houseEdgeBps, $self'state, $self'totalBets, $self'totalPayouts, $self'pendingNonce, $self'pendingBet, $self'pendingGuess));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}

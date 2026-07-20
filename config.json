@@ -1,0 +1,35 @@
+{
+  "network": "testnet",
+  "rpcEndpoint": "https://toncenter.com/api/v3/jsonRPC",
+  "rpcApiKey": "",
+  "commissionBps": 500,
+  "providerStake": "1",
+  "games": {
+    "dice": {
+      "enabled": true,
+      "minBet": "0.1",
+      "maxBet": "100",
+      "maxPayout": "500"
+    },
+    "slot": {
+      "enabled": true,
+      "minBet": "0.1",
+      "maxBet": "50",
+      "maxPayout": "1000"
+    }
+  },
+  "demo": {
+    "gamesCount": 10,
+    "betAmount": "100"
+  },
+  "security": {
+    "revealWindowSec": 3600,
+    "slashPenaltyPct": 10,
+    "maxCommission": 10000
+  },
+  "miniApp": {
+    "title": "Trustless Casino",
+    "description": "Provably fair casino on TON",
+    "botUsername": ""
+  }
+}

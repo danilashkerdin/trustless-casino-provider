@@ -1,0 +1,14 @@
+{
+    "projects": [
+        {
+            "name": "ProviderContract",
+            "path": "contracts/tact/provider_contract.tact",
+            "output": "build/tact"
+        },
+        {
+            "name": "DiceGame",
+            "path": "contracts/tact/dice_game.tact",
+            "output": "build/tact"
+        }
+    ]
+}

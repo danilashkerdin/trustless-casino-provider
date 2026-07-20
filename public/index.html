@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trustless Casino — Slot</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+    .container {
+      max-width: 380px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin: 16px 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slot-machine {
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid #2a2a4a;
+    }
+    .reels {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .reel {
+      width: 80px;
+      height: 80px;
+      background: #0f0f1a;
+      border: 2px solid #2a2a4a;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      transition: all 0.1s;
+    }
+    .reel.spinning {
+      animation: spin 0.1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(360deg); }
+    }
+    .reel.win {
+      border-color: #4ade80;
+      box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+    }
+    .reel.lose {
+      border-color: #ef4444;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bet-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f0f1a;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .bet-control label { font-size: 14px; color: #888; }
+    .bet-control input {
+      background: transparent;
+      border: none;
+      color: #e0e0e0;
+      font-size: 16px;
+      width: 80px;
+      text-align: right;
+      font-family: monospace;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .result {
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .result.win {
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #4ade80;
+    }
+    .result.lose {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+    .status {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .verify-section {
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #2a2a4a;
+    }
+    .verify-section h3 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #888;
+    }
+    .verify-data {
+      font-family: monospace;
+      font-size: 10px;
+      word-break: break-all;
+      background: #0f0f1a;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .verify-data div { margin-bottom: 4px; }
+    .verify-data .label { color: #666; }
+    .verify-data .value { color: #4ade80; }
+    .verify-btn {
+      background: transparent;
+      border: 1px solid #4ade80;
+      color: #4ade80;
+      width: 100%;
+    }
+    .verify-btn:hover {
+      background: rgba(74, 222, 128, 0.1);
+    }
+    .verify-result {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .verify-result.pass {
+      background: rgba(74, 222, 128, 0.1);
+      color: #4ade80;
+    }
+    .verify-result.fail {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎰 TRUSTLESS SLOT</h1>
+    
+    <div class="slot-machine">
+      <div class="reels">
+        <div class="reel" id="reel1">🍒</div>
+        <div class="reel" id="reel2">🍒</div>
+        <div class="reel" id="reel3">🍒</div>
+      </div>
+
+      <div class="controls">
+        <div class="bet-control">
+          <label>Bet (TON)</label>
+          <input type="number" id="betInput" value="0.1" min="0.01" step="0.01">
+        </div>
+        <button id="spinBtn">SPIN</button>
+        <div id="resultDisplay" class="result" style="display:none"></div>
+        <div class="status" id="statusDisplay">Ready. Server seed committed.</div>
+      </div>
+    </div>
+
+    <div class="verify-section">
+      <h3>🔍 Provably Fair Verification</h3>
+      <div class="verify-data" id="verifyData">
+        <div><span class="label">Server Seed Hash:</span></div>
+        <div style="color:#888;font-size:10px" id="seedHashDisplay">—</div>
+        <div style="margin-top:8px"><span class="label">Client Seed:</span></div>
+        <div style="color:#888;font-size:10px" id="clientSeedDisplay">—</div>
+      </div>
+      <button class="verify-btn" id="verifyBtn" disabled>Verify Last Game</button>
+      <div id="verifyResult" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+    const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣'];
+    const SYM_NAMES = ['cherry', 'lemon', 'orange', 'grape', 'diamond', 'seven'];
+    const MULTIPLIERS = {
+      'cherry_cherry_cherry': 40,
+      'lemon_lemon_lemon': 30,
+      'orange_orange_orange': 20,
+      'grape_grape_grape': 15,
+      'diamond_diamond_diamond': 10,
+      'seven_seven_seven': 50,
+      'cherry_cherry_*': 5,
+      'lemon_lemon_*': 4,
+      'orange_orange_*': 3,
+      'diamond_*_*': 2,
+    };
+
+    let gameState = {
+      gameId: null,
+      serverSeedHash: null,
+      serverSeed: null,
+      clientSeed: null,
+      nonce: null,
+      result: null,
+      spinning: false,
+    };
+
+    const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+    const spinBtn = document.getElementById('spinBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const seedHashDisplay = document.getElementById('seedHashDisplay');
+    const clientSeedDisplay = document.getElementById('clientSeedDisplay');
+    const verifyResult = document.getElementById('verifyResult');
+
+    // Simple SHA256 implementation for browser
+    async function sha256(data) {
+      const buf = new TextEncoder().encode(data);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function hexToBytes(hex) {
+      const bytes = [];
+      for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
+      return new Uint8Array(bytes);
+    }
+
+    async function sha256Buffer(buffer) {
+      const hash = await crypto.subtle.digest('SHA-256', buffer);
+      return new Uint8Array(hash);
+    }
+
+    function bytesToHex(bytes) {
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function randomHex(len) {
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);
+      return bytesToHex(bytes);
+    }
+
+    async function calculateGameResult(serverSeed, clientSeed, nonce) {
+      const enc = new TextEncoder();
+      const nonceBuf = new ArrayBuffer(8);
+      const dv = new DataView(nonceBuf);
+      dv.setBigUint64(0, BigInt(nonce));
+      
+      const data = new Uint8Array([
+        ...hexToBytes(serverSeed),
+        ...hexToBytes(clientSeed),
+        ...new Uint8Array(nonceBuf)
+      ]);
+      
+      const hash = await sha256Buffer(data);
+      const val = BigInt('0x' + bytesToHex(hash.slice(0, 8)));
+      return Number(val % BigInt(10000));
+    }
+
+    function outcomeToSymbols(outcome) {
+      const idx1 = outcome % SYMBOLS.length;
+      const idx2 = (Math.floor(outcome / SYMBOLS.length) + idx1) % SYMBOLS.length;
+      const idx3 = (Math.floor(outcome / (SYMBOLS.length * SYMBOLS.length)) + idx2) % SYMBOLS.length;
+      return [idx1, idx2, idx3];
+    }
+
+    function getWinMultiplier(indices) {
+      const names = indices.map(i => SYM_NAMES[i]);
+      const key = names.join('_');
+      
+      if (MULTIPLIERS[key]) return MULTIPLIERS[key];
+      
+      // Two of a kind
+      if (names[0] === names[1]) return MULTIPLIERS[`${names[0]}_${names[0]}_*`] || 0;
+      if (names[0] === names[2]) return MULTIPLIERS[`${names[0]}_*_*`] || 0;
+      if (names[1] === names[2]) return 2;
+      
+      // Diamond anywhere
+      if (names[0] === 'diamond') return MULTIPLIERS['diamond_*_*'] || 0;
+      
+      return 0;
+    }
+
+    async function spin() {
+      if (gameState.spinning) return;
+      gameState.spinning = true;
+      spinBtn.disabled = true;
+      resultDisplay.style.display = 'none';
+
+      const betAmount = parseFloat(document.getElementById('betInput').value);
+      if (betAmount <= 0) { alert('Bet must be > 0'); return; }
+
+      // 1. Provider generates server seed, commits hash
+      const serverSeed = randomHex(32);
+      const serverSeedHash = await sha256(serverSeed);
+      const gameId = 'slot-' + Date.now();
+      const nonce = Math.floor(Math.random() * 1000000);
+      const clientSeed = randomHex(32);
+
+      statusDisplay.textContent = '🔮 Game committed... Spinning...';
+
+      // Show hash before reveal
+      seedHashDisplay.textContent = serverSeedHash;
+      clientSeedDisplay.textContent = clientSeed;
+
+      // 2. Calculate result
+      const outcome = await calculateGameResult(serverSeed, clientSeed, nonce);
+      const indices = outcomeToSymbols(outcome);
+      const multiplier = getWinMultiplier(indices);
+      const payout = multiplier > 0 ? betAmount * multiplier : 0;
+
+      // 3. Animate reels
+      for (let i = 0; i < reels.length; i++) {
+        reels[i].classList.add('spinning');
+      }
+
+      let counter = 0;
+      const spinInterval = setInterval(() => {
+        for (let i = 0; i < reels.length; i++) {
+          reels[i].textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+        }
+        counter++;
+        if (counter > 15) {
+          clearInterval(spinInterval);
+          // Show final result
+          for (let i = 0; i < reels.length; i++) {
+            reels[i].classList.remove('spinning');
+            reels[i].textContent = SYMBOLS[indices[i]];
+          }
+
+          gameState.gameId = gameId;
+          gameState.serverSeedHash = serverSeedHash;
+          gameState.serverSeed = serverSeed;
+          gameState.clientSeed = clientSeed;
+          gameState.nonce = nonce;
+          gameState.result = { outcome, indices, multiplier, payout, bet: betAmount };
+
+          if (payout > 0) {
+            for (const r of reels) r.classList.add('win');
+            resultDisplay.className = 'result win';
+            resultDisplay.textContent = `🎉 WIN! ${multiplier}x = ${payout.toFixed(2)} TON`;
+          } else {
+            for (const r of reels) r.classList.add('lose');
+            resultDisplay.className = 'result lose';
+            resultDisplay.textContent = `😢 Lost ${betAmount.toFixed(2)} TON`;
+          }
+          resultDisplay.style.display = 'block';
+
+          statusDisplay.textContent = '✅ Game resolved. Click Verify to check fairness.';
+          verifyBtn.disabled = false;
+          gameState.spinning = false;
+          spinBtn.disabled = false;
+          
+          setTimeout(() => {
+            for (const r of reels) r.classList.remove('win', 'lose');
+          }, 2000);
+        }
+      }, 80);
+    }
+
+    async function verifyGame() {
+      if (!gameState.serverSeed) {
+        verifyResult.style.display = 'block';
+        verifyResult.className = 'verify-result fail';
+        verifyResult.textContent = '❌ No game to verify. Spin first!';
+        return;
+      }
+
+      const { serverSeed, serverSeedHash, clientSeed, nonce, result } = gameState;
+      
+      // Verify 1: SHA256(serverSeed) === serverSeedHash
+      const computedHash = await sha256(serverSeed);
+      const seedMatch = computedHash === serverSeedHash;
+
+      // Verify 2: outcome === F(serverSeed, clientSeed, nonce)
+      const computedOutcome = await calculateGameResult(serverSeed, clientSeed, nonce);
+      const outcomeMatch = computedOutcome === result.outcome;
+
+      verifyResult.style.display = 'block';
+
+      let html = '';
+      if (seedMatch && outcomeMatch) {
+        verifyResult.className = 'verify-result pass';
+        html = '✅ GAME IS FAIR<br><small>';
+        html += `SHA256(seed) match: ✅<br>`;
+        html += `Outcome calculation: ✅</small>`;
+      } else {
+        verifyResult.className = 'verify-result fail';
+        html = '❌ CHEATING DETECTED!<br><small>';
+        if (!seedMatch) html += `Seed hash mismatch: ❌<br>`;
+        if (!outcomeMatch) html += `Outcome mismatch: ❌<br>`;
+        html += `This provider can be SLASHED!</small>`;
+      }
+
+      html += `<br><br><div style="font-size:10px;text-align:left;word-break:break-all">`;
+      html += `Server Seed: ${serverSeed}<br>`;
+      html += `Revealed Hash: ${computedHash}<br>`;
+      html += `Expected Hash: ${serverSeedHash}</div>`;
+
+      verifyResult.innerHTML = html;
+    }
+
+    spinBtn.addEventListener('click', spin);
+    verifyBtn.addEventListener('click', verifyGame);
+
+    // Init Telegram Mini App
+    if (window.Telegram?.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+  </script>
+</body>
+</html>
