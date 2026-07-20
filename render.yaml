@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: trustless-casino
+    env: static
+    rootDir: .
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
