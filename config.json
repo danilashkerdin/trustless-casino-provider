@@ -29,7 +29,8 @@
   },
   "miniApp": {
     "title": "Trustless Casino",
-    "description": "Provably fair casino on TON",
-    "botUsername": ""
+    "description": "Provably fair casino on TON — Slots, Roulette, Dice, Crash, Mines",
+    "botUsername": "",
+    "url": "https://trustless-casino-provider.onrender.com"
   }
 }
