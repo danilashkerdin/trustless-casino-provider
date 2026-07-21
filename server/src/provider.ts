@@ -5,7 +5,8 @@ import { ProvablyFairCore } from '../../contracts/ts/sdk/provablyFair';
 import path from 'path';
 import fs from 'fs';
 
-const BD = path.resolve(__dirname, '../../build/tact');
+const ROOT = process.cwd();
+const BD = path.resolve(ROOT, 'build/tact');
 
 function loadCode(name: string): Cell {
   const p = path.join(BD, `${name}.code.boc`);
@@ -44,7 +45,7 @@ export class CasinoProvider {
 
   static async init(rpc: string, apiKey: string): Promise<CasinoProvider> {
     const deployData = JSON.parse(
-      fs.readFileSync(path.resolve(__dirname, '../../deployed.json'), 'utf-8'),
+      fs.readFileSync(path.resolve(ROOT, 'deployed.json'), 'utf-8'),
     );
     const mnemonics = (process.env.WALLET_MNEMONICS || '').split(' ');
     if (mnemonics.length !== 24) throw new Error('WALLET_MNEMONICS required');
