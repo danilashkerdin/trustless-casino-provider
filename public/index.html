@@ -604,14 +604,14 @@
 
       try {
         // 1. Get server seed from provider
-        const initRes = await fetch('/api/init-game', { method: 'POST' }).then(r=>r.json());
+        const initRes = await fetch(API_URL + '/init-game', { method: 'POST' }).then(r=>r.json());
         if (!initRes.ok) throw new Error(initRes.error);
         const { serverSeed, serverSeedHash } = initRes;
         const clientSeed = randomHex(32);
         const nonce = Math.floor(Math.random()*1000000) + 1;
 
         // 2. Build PlaceBet payload via provider API
-        const payloadRes = await fetch('/api/build-bet-payload', {
+        const payloadRes = await fetch(API_URL + '/build-bet-payload', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ nonce, guess: dSelected, clientSeed, serverSeedHash }),
@@ -631,7 +631,7 @@
         const txResult = await tonConnectUI.sendTransaction(tx);
 
         // 4. Reveal on provider backend
-        const revealRes = await fetch('/api/reveal', {
+        const revealRes = await fetch(API_URL + '/reveal', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ nonce, serverSeed, serverSeedHash, guess: dSelected, clientSeed }),
@@ -776,8 +776,9 @@
     initMines();
 
     // ===== TON CONNECT =====
+    const API_URL = 'https://trustless-casino-api.onrender.com';
     const CONTRACT = {
-      provider: '0:208a6a0e4e5e6ae53d3f25e5d58a04371580090374f22a09f293d7d84d9ba3c0',
+      provider: '0:e49e0dcdbe323cedbff5e5a0d58b1dd4415e9a10b99aa8d8041a50c061e6629c',
       dice: '0:d6abb8922d3be36ea58aec77f9d24b3936c73c0c49ec2dec69c12bdd09b5b440',
     };
     const IS_TESTNET = true;
