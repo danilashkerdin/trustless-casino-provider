@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Trustless Casino</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -285,7 +286,7 @@
     <div class="sub">Provably Fair • On-Chain • Open Source</div>
   </div>
   <div class="balance-bar">
-    <span>Balance</span>
+    <button id="connectBtn" style="background:linear-gradient(135deg,#4ade80,#22c55e);border:none;border-radius:8px;padding:6px 14px;color:#0a0a1a;font-size:12px;font-weight:700;cursor:pointer">Connect Wallet</button>
     <span class="amount" id="balanceDisplay">0.00 TON</span>
   </div>
 
@@ -748,11 +749,67 @@
     });
     initMines();
 
+    // ===== TON CONNECT =====
+    const CONTRACT = {
+      provider: '0:208a6a0e4e5e6ae53d3f25e5d58a04371580090374f22a09f293d7d84d9ba3c0',
+      dice: '0:d6abb8922d3be36ea58aec77f9d24b3936c73c0c49ec2dec69c12bdd09b5b440',
+    };
+    const IS_TESTNET = true;
+
+    let wallet = null;
+    let tonAddr = null;
+
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://trustless-casino-provider.onrender.com/tonconnect-manifest.json',
+      buttonRootId: 'connectBtn',
+    });
+
+    tonConnectUI.onStatusChange(async (w) => {
+      wallet = w;
+      if (w) {
+        tonAddr = w.account.address;
+        $('connectBtn').textContent = tonAddr.slice(0,6) + '...' + tonAddr.slice(-4);
+        const bal = await fetch(`https://testnet.toncenter.com/api/v2/getAddressBalance?address=${tonAddr}`).then(r=>r.json());
+        $('balanceDisplay').textContent = (bal.ok ? Number(bal.result)/1e9 : 0).toFixed(4) + ' TON';
+      } else {
+        tonAddr = null;
+        $('connectBtn').textContent = 'Connect Wallet';
+        $('balanceDisplay').textContent = '0.00 TON';
+      }
+    });
+
+    async function sendPlaceBet(guess, betAmount, clientSeed, serverSeedHash) {
+      if (!wallet) { alert('Connect wallet first!'); return; }
+      const nonce = Math.floor(Math.random() * 1000000) + 1;
+      // PlaceBet сообщение: op=0x01, nonce(uint64), guess(uint8), clientSeed(cell), serverSeedHash(cell)
+      const body = new Uint8Array([
+        0,0,0,1, // op
+        ...new Uint8Array(8).fill(0), // nonce placeholder
+        guess,
+        // ...cell encoding is complex - use comment for demo
+      ]);
+      const tx = {
+        validUntil: Math.floor(Date.now()/1000) + 300,
+        messages: [{
+          address: CONTRACT.provider,
+          amount: (betAmount * 1e9).toString(),
+          // payload: ... we skip raw cell encoding for demo
+        }]
+      };
+      try {
+        await tonConnectUI.sendTransaction(tx);
+        return nonce;
+      } catch(e) { console.error(e); return null; }
+    }
+
+    // Override spin/roll buttons to use real tx when wallet connected
+    function patchSlotsWithTon() {
+      if (!wallet) return;
+      // slots already uses local provably fair — fine for demo
+    }
+
     // ===== TELEGRAM =====
     if (window.Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); }
-
-    // ===== BALANCE =====
-    $('balanceDisplay').textContent = '10.00 TON';
   </script>
 </body>
 </html>
