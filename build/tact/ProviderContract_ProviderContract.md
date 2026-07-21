@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: ProviderContract
-BoC Size: 1286 bytes
+BoC Size: 1558 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 17
+Total structures: 19
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -57,21 +57,29 @@ Signature: `WithdrawStake{amount:coins}`
 TL-B: `set_commission#00000012 commissionBps:uint16 = SetCommission`
 Signature: `SetCommission{commissionBps:uint16}`
 
+### WithdrawCommission
+TL-B: `withdraw_commission#00000013 amount:coins = WithdrawCommission`
+Signature: `WithdrawCommission{amount:coins}`
+
 ### PlaceBet
-TL-B: `place_bet#00000001 nonce:uint64 guess:uint8 clientSeed:^cell serverSeedHash:^cell = PlaceBet`
-Signature: `PlaceBet{nonce:uint64,guess:uint8,clientSeed:^cell,serverSeedHash:^cell}`
+TL-B: `place_bet#00000001 nonce:uint64 guess:uint8 clientSeed:^cell serverSeedHash:uint256 = PlaceBet`
+Signature: `PlaceBet{nonce:uint64,guess:uint8,clientSeed:^cell,serverSeedHash:uint256}`
 
 ### RevealSeed
-TL-B: `reveal_seed#00000002 nonce:uint64 serverSeed:^cell guess:uint8 clientSeed:^cell = RevealSeed`
-Signature: `RevealSeed{nonce:uint64,serverSeed:^cell,guess:uint8,clientSeed:^cell}`
+TL-B: `reveal_seed#00000002 nonce:uint64 serverSeed:^slice serverSeedHash:uint256 guess:uint8 clientSeed:^cell = RevealSeed`
+Signature: `RevealSeed{nonce:uint64,serverSeed:^slice,serverSeedHash:uint256,guess:uint8,clientSeed:^cell}`
 
 ### GameResult
 TL-B: `game_result#00000020 outcome:uint32 win:bool multiplierBps:uint16 grossPayout:coins commissionTaken:coins netPayout:coins serverSeed:^cell nonce:uint64 = GameResult`
 Signature: `GameResult{outcome:uint32,win:bool,multiplierBps:uint16,grossPayout:coins,commissionTaken:coins,netPayout:coins,serverSeed:^cell,nonce:uint64}`
 
+### SlashStake
+TL-B: `slash_stake#00000030 nonce:uint64 expectedHash:uint256 actualServerSeed:^slice clientSeed:^cell betAmount:coins guess:uint8 = SlashStake`
+Signature: `SlashStake{nonce:uint64,expectedHash:uint256,actualServerSeed:^slice,clientSeed:^cell,betAmount:coins,guess:uint8}`
+
 ### ProviderContract$Data
-TL-B: `_ owner:address commissionBps:uint16 stake:coins totalBets:coins totalPayouts:coins totalCommission:coins gameCount:uint32 pendingSender:address pendingBetAmount:coins pendingGuess:uint8 = ProviderContract`
-Signature: `ProviderContract{owner:address,commissionBps:uint16,stake:coins,totalBets:coins,totalPayouts:coins,totalCommission:coins,gameCount:uint32,pendingSender:address,pendingBetAmount:coins,pendingGuess:uint8}`
+TL-B: `_ owner:address commissionBps:uint16 stake:coins totalBets:coins totalPayouts:coins totalCommission:coins gameCount:uint32 pendingSender:address pendingBetAmount:coins pendingGuess:uint8 pendingSeedHash:uint256 = ProviderContract`
+Signature: `ProviderContract{owner:address,commissionBps:uint16,stake:coins,totalBets:coins,totalPayouts:coins,totalCommission:coins,gameCount:uint32,pendingSender:address,pendingBetAmount:coins,pendingGuess:uint8,pendingSeedHash:uint256}`
 
 ## Get methods
 Total get methods: 5
@@ -128,11 +136,14 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 3006: Seed matches — no slash
 * 8045: Resolve previous bet first
 * 11191: Provider stake required
 * 11977: Amount > 0
+* 15371: Seed mismatch — slash!
 * 20824: Max 10000 (100%)
 * 21245: Insufficient stake
+* 27584: Insufficient commission
 * 27815: No pending bet
 * 28115: No stake
 * 35499: Only owner

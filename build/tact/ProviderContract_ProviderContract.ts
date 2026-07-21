@@ -744,12 +744,59 @@ export function dictValueParserSetCommission(): DictionaryValue<SetCommission> {
     }
 }
 
+export type WithdrawCommission = {
+    $$type: 'WithdrawCommission';
+    amount: bigint;
+}
+
+export function storeWithdrawCommission(src: WithdrawCommission) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(19, 32);
+        b_0.storeCoins(src.amount);
+    };
+}
+
+export function loadWithdrawCommission(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 19) { throw Error('Invalid prefix'); }
+    const _amount = sc_0.loadCoins();
+    return { $$type: 'WithdrawCommission' as const, amount: _amount };
+}
+
+export function loadTupleWithdrawCommission(source: TupleReader) {
+    const _amount = source.readBigNumber();
+    return { $$type: 'WithdrawCommission' as const, amount: _amount };
+}
+
+export function loadGetterTupleWithdrawCommission(source: TupleReader) {
+    const _amount = source.readBigNumber();
+    return { $$type: 'WithdrawCommission' as const, amount: _amount };
+}
+
+export function storeTupleWithdrawCommission(source: WithdrawCommission) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.amount);
+    return builder.build();
+}
+
+export function dictValueParserWithdrawCommission(): DictionaryValue<WithdrawCommission> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeWithdrawCommission(src)).endCell());
+        },
+        parse: (src) => {
+            return loadWithdrawCommission(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type PlaceBet = {
     $$type: 'PlaceBet';
     nonce: bigint;
     guess: bigint;
     clientSeed: Cell;
-    serverSeedHash: Cell;
+    serverSeedHash: bigint;
 }
 
 export function storePlaceBet(src: PlaceBet) {
@@ -759,7 +806,7 @@ export function storePlaceBet(src: PlaceBet) {
         b_0.storeUint(src.nonce, 64);
         b_0.storeUint(src.guess, 8);
         b_0.storeRef(src.clientSeed);
-        b_0.storeRef(src.serverSeedHash);
+        b_0.storeUint(src.serverSeedHash, 256);
     };
 }
 
@@ -769,7 +816,7 @@ export function loadPlaceBet(slice: Slice) {
     const _nonce = sc_0.loadUintBig(64);
     const _guess = sc_0.loadUintBig(8);
     const _clientSeed = sc_0.loadRef();
-    const _serverSeedHash = sc_0.loadRef();
+    const _serverSeedHash = sc_0.loadUintBig(256);
     return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
@@ -777,7 +824,7 @@ export function loadTuplePlaceBet(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _serverSeedHash = source.readCell();
+    const _serverSeedHash = source.readBigNumber();
     return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
@@ -785,7 +832,7 @@ export function loadGetterTuplePlaceBet(source: TupleReader) {
     const _nonce = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    const _serverSeedHash = source.readCell();
+    const _serverSeedHash = source.readBigNumber();
     return { $$type: 'PlaceBet' as const, nonce: _nonce, guess: _guess, clientSeed: _clientSeed, serverSeedHash: _serverSeedHash };
 }
 
@@ -794,7 +841,7 @@ export function storeTuplePlaceBet(source: PlaceBet) {
     builder.writeNumber(source.nonce);
     builder.writeNumber(source.guess);
     builder.writeCell(source.clientSeed);
-    builder.writeCell(source.serverSeedHash);
+    builder.writeNumber(source.serverSeedHash);
     return builder.build();
 }
 
@@ -812,7 +859,8 @@ export function dictValueParserPlaceBet(): DictionaryValue<PlaceBet> {
 export type RevealSeed = {
     $$type: 'RevealSeed';
     nonce: bigint;
-    serverSeed: Cell;
+    serverSeed: Slice;
+    serverSeedHash: bigint;
     guess: bigint;
     clientSeed: Cell;
 }
@@ -822,7 +870,8 @@ export function storeRevealSeed(src: RevealSeed) {
         const b_0 = builder;
         b_0.storeUint(2, 32);
         b_0.storeUint(src.nonce, 64);
-        b_0.storeRef(src.serverSeed);
+        b_0.storeRef(src.serverSeed.asCell());
+        b_0.storeUint(src.serverSeedHash, 256);
         b_0.storeUint(src.guess, 8);
         b_0.storeRef(src.clientSeed);
     };
@@ -832,32 +881,36 @@ export function loadRevealSeed(slice: Slice) {
     const sc_0 = slice;
     if (sc_0.loadUint(32) !== 2) { throw Error('Invalid prefix'); }
     const _nonce = sc_0.loadUintBig(64);
-    const _serverSeed = sc_0.loadRef();
+    const _serverSeed = sc_0.loadRef().asSlice();
+    const _serverSeedHash = sc_0.loadUintBig(256);
     const _guess = sc_0.loadUintBig(8);
     const _clientSeed = sc_0.loadRef();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, serverSeedHash: _serverSeedHash, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadTupleRevealSeed(source: TupleReader) {
     const _nonce = source.readBigNumber();
-    const _serverSeed = source.readCell();
+    const _serverSeed = source.readCell().asSlice();
+    const _serverSeedHash = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, serverSeedHash: _serverSeedHash, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function loadGetterTupleRevealSeed(source: TupleReader) {
     const _nonce = source.readBigNumber();
-    const _serverSeed = source.readCell();
+    const _serverSeed = source.readCell().asSlice();
+    const _serverSeedHash = source.readBigNumber();
     const _guess = source.readBigNumber();
     const _clientSeed = source.readCell();
-    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, guess: _guess, clientSeed: _clientSeed };
+    return { $$type: 'RevealSeed' as const, nonce: _nonce, serverSeed: _serverSeed, serverSeedHash: _serverSeedHash, guess: _guess, clientSeed: _clientSeed };
 }
 
 export function storeTupleRevealSeed(source: RevealSeed) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.nonce);
-    builder.writeCell(source.serverSeed);
+    builder.writeSlice(source.serverSeed.asCell());
+    builder.writeNumber(source.serverSeedHash);
     builder.writeNumber(source.guess);
     builder.writeCell(source.clientSeed);
     return builder.build();
@@ -963,6 +1016,83 @@ export function dictValueParserGameResult(): DictionaryValue<GameResult> {
     }
 }
 
+export type SlashStake = {
+    $$type: 'SlashStake';
+    nonce: bigint;
+    expectedHash: bigint;
+    actualServerSeed: Slice;
+    clientSeed: Cell;
+    betAmount: bigint;
+    guess: bigint;
+}
+
+export function storeSlashStake(src: SlashStake) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(48, 32);
+        b_0.storeUint(src.nonce, 64);
+        b_0.storeUint(src.expectedHash, 256);
+        b_0.storeRef(src.actualServerSeed.asCell());
+        b_0.storeRef(src.clientSeed);
+        b_0.storeCoins(src.betAmount);
+        b_0.storeUint(src.guess, 8);
+    };
+}
+
+export function loadSlashStake(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 48) { throw Error('Invalid prefix'); }
+    const _nonce = sc_0.loadUintBig(64);
+    const _expectedHash = sc_0.loadUintBig(256);
+    const _actualServerSeed = sc_0.loadRef().asSlice();
+    const _clientSeed = sc_0.loadRef();
+    const _betAmount = sc_0.loadCoins();
+    const _guess = sc_0.loadUintBig(8);
+    return { $$type: 'SlashStake' as const, nonce: _nonce, expectedHash: _expectedHash, actualServerSeed: _actualServerSeed, clientSeed: _clientSeed, betAmount: _betAmount, guess: _guess };
+}
+
+export function loadTupleSlashStake(source: TupleReader) {
+    const _nonce = source.readBigNumber();
+    const _expectedHash = source.readBigNumber();
+    const _actualServerSeed = source.readCell().asSlice();
+    const _clientSeed = source.readCell();
+    const _betAmount = source.readBigNumber();
+    const _guess = source.readBigNumber();
+    return { $$type: 'SlashStake' as const, nonce: _nonce, expectedHash: _expectedHash, actualServerSeed: _actualServerSeed, clientSeed: _clientSeed, betAmount: _betAmount, guess: _guess };
+}
+
+export function loadGetterTupleSlashStake(source: TupleReader) {
+    const _nonce = source.readBigNumber();
+    const _expectedHash = source.readBigNumber();
+    const _actualServerSeed = source.readCell().asSlice();
+    const _clientSeed = source.readCell();
+    const _betAmount = source.readBigNumber();
+    const _guess = source.readBigNumber();
+    return { $$type: 'SlashStake' as const, nonce: _nonce, expectedHash: _expectedHash, actualServerSeed: _actualServerSeed, clientSeed: _clientSeed, betAmount: _betAmount, guess: _guess };
+}
+
+export function storeTupleSlashStake(source: SlashStake) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.nonce);
+    builder.writeNumber(source.expectedHash);
+    builder.writeSlice(source.actualServerSeed.asCell());
+    builder.writeCell(source.clientSeed);
+    builder.writeNumber(source.betAmount);
+    builder.writeNumber(source.guess);
+    return builder.build();
+}
+
+export function dictValueParserSlashStake(): DictionaryValue<SlashStake> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSlashStake(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSlashStake(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type ProviderContract$Data = {
     $$type: 'ProviderContract$Data';
     owner: Address;
@@ -975,6 +1105,7 @@ export type ProviderContract$Data = {
     pendingSender: Address;
     pendingBetAmount: bigint;
     pendingGuess: bigint;
+    pendingSeedHash: bigint;
 }
 
 export function storeProviderContract$Data(src: ProviderContract$Data) {
@@ -991,6 +1122,7 @@ export function storeProviderContract$Data(src: ProviderContract$Data) {
         b_1.storeAddress(src.pendingSender);
         b_1.storeCoins(src.pendingBetAmount);
         b_1.storeUint(src.pendingGuess, 8);
+        b_1.storeUint(src.pendingSeedHash, 256);
         b_0.storeRef(b_1.endCell());
     };
 }
@@ -1008,7 +1140,8 @@ export function loadProviderContract$Data(slice: Slice) {
     const _pendingSender = sc_1.loadAddress();
     const _pendingBetAmount = sc_1.loadCoins();
     const _pendingGuess = sc_1.loadUintBig(8);
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
+    const _pendingSeedHash = sc_1.loadUintBig(256);
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess, pendingSeedHash: _pendingSeedHash };
 }
 
 export function loadTupleProviderContract$Data(source: TupleReader) {
@@ -1022,7 +1155,8 @@ export function loadTupleProviderContract$Data(source: TupleReader) {
     const _pendingSender = source.readAddress();
     const _pendingBetAmount = source.readBigNumber();
     const _pendingGuess = source.readBigNumber();
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
+    const _pendingSeedHash = source.readBigNumber();
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess, pendingSeedHash: _pendingSeedHash };
 }
 
 export function loadGetterTupleProviderContract$Data(source: TupleReader) {
@@ -1036,7 +1170,8 @@ export function loadGetterTupleProviderContract$Data(source: TupleReader) {
     const _pendingSender = source.readAddress();
     const _pendingBetAmount = source.readBigNumber();
     const _pendingGuess = source.readBigNumber();
-    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess };
+    const _pendingSeedHash = source.readBigNumber();
+    return { $$type: 'ProviderContract$Data' as const, owner: _owner, commissionBps: _commissionBps, stake: _stake, totalBets: _totalBets, totalPayouts: _totalPayouts, totalCommission: _totalCommission, gameCount: _gameCount, pendingSender: _pendingSender, pendingBetAmount: _pendingBetAmount, pendingGuess: _pendingGuess, pendingSeedHash: _pendingSeedHash };
 }
 
 export function storeTupleProviderContract$Data(source: ProviderContract$Data) {
@@ -1051,6 +1186,7 @@ export function storeTupleProviderContract$Data(source: ProviderContract$Data) {
     builder.writeAddress(source.pendingSender);
     builder.writeNumber(source.pendingBetAmount);
     builder.writeNumber(source.pendingGuess);
+    builder.writeNumber(source.pendingSeedHash);
     return builder.build();
 }
 
@@ -1080,7 +1216,7 @@ function initProviderContract_init_args(src: ProviderContract_init_args) {
 }
 
 async function ProviderContract_init(owner: Address, commissionBps: bigint) {
-    const __code = Cell.fromHex('b5ee9c72410219010004fa000114ff00f4a413f4bcf2c80b01020162020b04f6d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e20b925f0be009d70d1ff2e08221c010e30221c011e30221c012e302210304050600805bf8416f24135f0316a0107910680710461035443012c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed5401c231fa003082008aabf8422ac705f2f4812ec921c200f2f48152fd5371bef2f45166a152876d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00107955160a00a0313706d30f3082008aabf84229c705f2f481515821812710bbf2f41079081057104610354403c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed5401fec0018e773b5b08d33f31d30730812bb725c200f2f48200f51c21c2009321c1079170e2f2f4f8416f24135f038200dd4621c200f2f4811f6d09c00019f2f4f8425148a009a4107910681057105610354433c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed54e001c0020702f88f74d33fd4d30731d430816dd329c200f2f4816ca72cc200f2f421d001d023db3c520dba705470018e2e5f030ba7065309a8812710a9045301bc923020de5ca18152fd53b1bef2f451aaa1518aa05171a010ad108a074888913ee2705303948200ea609120e2061111060443135610020111120108c8e05f0bf2c0820809003cc85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da1176a908a401b6557080205009cb1f17cb1f15ca0013cb0f01fa0201fa0201fa02cccb3fc95442bb706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0055170a0054c87f01ca005590509ace17cb0f5005fa025003fa0201fa0201fa02cb1f01c8ce58fa0212cb07cdc9ed540201200c140201200d120201660e10019bae4576a268690000c7147d206987fd007d007d007d00698fea00e87d207d00698398081d081c881c081b881b081a881a360d470a7d20408080eb802c816880b82a38002a3800142cf16d9e3650c00f000224019bade376a268690000c7147d206987fd007d007d007d00698fea00e87d207d00698398081d081c881c081b881b081a881a360d470a7d20408080eb802c816880b82a38002a3800142cf16d9e3650c011000223019bba5cded44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18130002280201201517019bbaff2ed44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18160018269170e125812710a827a904019bbb7cced44d0d200018e28fa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d30730103a1039103810371036103510346c1a8e14fa40810101d7005902d101705470005470002859e2db3c6ca18180002274094df3b');
+    const __code = Cell.fromHex('b5ee9c7241021c0100060a000114ff00f4a413f4bcf2c80b01020162020e03f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e2afa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d307d3ff30104b104a104910481047104610456c1b8e16fa40810101d7005902d1017054700054700053085520e20c925f0ce00ad70d1ff2e08221c010e30221c011e30221c01203040500885bf8416f24135f0317a0108a1079081057104610354430c87f01ca0055a050abce18cb0f5006fa025004fa0258fa0201fa02cb1f01c8ce58fa0212cb0712cbffcdc9ed5401c231fa003082008aabf8422bc705f2f4812ec921c200f2f48152fd5381bef2f45177a152986d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00108a55170c04d68e56313807d30f3082008aabf8422ac705f2f481515821812710bbf2f4108a091068105710461035440302c87f01ca0055a050abce18cb0f5006fa025004fa0258fa0201fa02cb1f01c8ce58fa0212cb0712cbffcdc9ed54e021c013e30221c001e30221c002e30201c0300607080b01c231fa003082008aabf8422bc705f2f4812ec921c200f2f4816bc05351bef2f45144a152956d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00108a55170c01aa3132393908d33f31d307d431d3ff30812bb726c200f2f48200f51c22c2009322c1079170e2f2f4f8416f24135f038200dd4621c200f2f4811f6d0ac0001af2f4f8425159a00aa4108a1079106810671046103544440c02fc31d33fd401d001d3ff31d30731d430816dd32ac200f2f4816ca724c200f2f4219b9320d74a91d5e868f90400da11813c0b0fba1ef2f40cd0546c21db3c520cba705470018e2d5f0302a7065309a8812710a9045301bc923020de5ca18152fd53b1bef2f451aaa1518aa05171a0108a070844449135e2705300c801111101090a003cc85003cf1601cf16cb3fc9d09b9320d74a91d5e868f90400da1176a908a401dccb1f5250ca0005948200ea609120e25005cb0f5003fa0201fa0224fa02500ecf1612cb3fc9544333706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00108a1079106810571046103544030c02fc8ef9d33f31d3ffd401d001d431fa0030019b9320d74a91d5e868f90400da11810bbe03bd12f2f4a7065307bc923026de5177a15157a0f84250086d706d50426d50427fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00108a10795e345513e05f0c0c0d005ac87f01ca0055a050abce18cb0f5006fa025004fa0258fa0201fa02cb1f01c8ce58fa0212cb0712cbffcdc9ed540006f2c0820201200f170201201015020166111301a3ae4576a268690000c7157d206987fd007d007d007d00698fea00e87d207d006983e9ff980825882508248824082388230822b60dc70b7d20408080eb802c816880b82a38002a380029842a90716d9e3658c01200022501a3ade376a268690000c7157d206987fd007d007d007d00698fea00e87d207d006983e9ff980825882508248824082388230822b60dc70b7d20408080eb802c816880b82a38002a380029842a90716d9e3658c01400022401a3ba5cded44d0d200018e2afa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d307d3ff30104b104a104910481047104610456c1b8e16fa40810101d7005902d1017054700054700053085520e2db3c6cb1816000229020120181a01a3baff2ed44d0d200018e2afa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d307d3ff30104b104a104910481047104610456c1b8e16fa40810101d7005902d1017054700054700053085520e2db3c6cb18190018279170e126812710a828a90401a3bb7cced44d0d200018e2afa40d30ffa00fa00fa00fa00d31fd401d0fa40fa00d307d3ff30104b104a104910481047104610456c1b8e16fa40810101d7005902d1017054700054700053085520e2db3c6cb181b0002280d057ef7');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initProviderContract_init_args({ $$type: 'ProviderContract_init_args', owner, commissionBps })(builder);
@@ -1125,11 +1261,14 @@ export const ProviderContract_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    3006: { message: "Seed matches — no slash" },
     8045: { message: "Resolve previous bet first" },
     11191: { message: "Provider stake required" },
     11977: { message: "Amount > 0" },
+    15371: { message: "Seed mismatch — slash!" },
     20824: { message: "Max 10000 (100%)" },
     21245: { message: "Insufficient stake" },
+    27584: { message: "Insufficient commission" },
     27815: { message: "No pending bet" },
     28115: { message: "No stake" },
     35499: { message: "Only owner" },
@@ -1174,11 +1313,14 @@ export const ProviderContract_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Seed matches — no slash": 3006,
     "Resolve previous bet first": 8045,
     "Provider stake required": 11191,
     "Amount > 0": 11977,
+    "Seed mismatch — slash!": 15371,
     "Max 10000 (100%)": 20824,
     "Insufficient stake": 21245,
+    "Insufficient commission": 27584,
     "No pending bet": 27815,
     "No stake": 28115,
     "Only owner": 35499,
@@ -1200,19 +1342,23 @@ const ProviderContract_types: ABIType[] = [
     {"name":"AddStake","header":16,"fields":[]},
     {"name":"WithdrawStake","header":17,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"SetCommission","header":18,"fields":[{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
-    {"name":"PlaceBet","header":1,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"cell","optional":false}}]},
-    {"name":"RevealSeed","header":2,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"WithdrawCommission","header":19,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
+    {"name":"PlaceBet","header":1,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"uint","optional":false,"format":256}}]},
+    {"name":"RevealSeed","header":2,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"serverSeed","type":{"kind":"simple","type":"slice","optional":false}},{"name":"serverSeedHash","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"GameResult","header":32,"fields":[{"name":"outcome","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"win","type":{"kind":"simple","type":"bool","optional":false}},{"name":"multiplierBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"grossPayout","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"commissionTaken","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"netPayout","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"serverSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
-    {"name":"ProviderContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"stake","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalBets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalPayouts","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalCommission","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"gameCount","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"pendingSender","type":{"kind":"simple","type":"address","optional":false}},{"name":"pendingBetAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"pendingGuess","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
+    {"name":"SlashStake","header":48,"fields":[{"name":"nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"expectedHash","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"actualServerSeed","type":{"kind":"simple","type":"slice","optional":false}},{"name":"clientSeed","type":{"kind":"simple","type":"cell","optional":false}},{"name":"betAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"guess","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
+    {"name":"ProviderContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"commissionBps","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"stake","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalBets","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalPayouts","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"totalCommission","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"gameCount","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"pendingSender","type":{"kind":"simple","type":"address","optional":false}},{"name":"pendingBetAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"pendingGuess","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"pendingSeedHash","type":{"kind":"simple","type":"uint","optional":false,"format":256}}]},
 ]
 
 const ProviderContract_opcodes = {
     "AddStake": 16,
     "WithdrawStake": 17,
     "SetCommission": 18,
+    "WithdrawCommission": 19,
     "PlaceBet": 1,
     "RevealSeed": 2,
     "GameResult": 32,
+    "SlashStake": 48,
 }
 
 const ProviderContract_getters: ABIGetter[] = [
@@ -1235,8 +1381,10 @@ const ProviderContract_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"typed","type":"AddStake"}},
     {"receiver":"internal","message":{"kind":"typed","type":"WithdrawStake"}},
     {"receiver":"internal","message":{"kind":"typed","type":"SetCommission"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"WithdrawCommission"}},
     {"receiver":"internal","message":{"kind":"typed","type":"PlaceBet"}},
     {"receiver":"internal","message":{"kind":"typed","type":"RevealSeed"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SlashStake"}},
 ]
 
 
@@ -1274,7 +1422,7 @@ export class ProviderContract implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: AddStake | WithdrawStake | SetCommission | PlaceBet | RevealSeed) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: AddStake | WithdrawStake | SetCommission | WithdrawCommission | PlaceBet | RevealSeed | SlashStake) {
         
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'AddStake') {
@@ -1286,11 +1434,17 @@ export class ProviderContract implements Contract {
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetCommission') {
             body = beginCell().store(storeSetCommission(message)).endCell();
         }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'WithdrawCommission') {
+            body = beginCell().store(storeWithdrawCommission(message)).endCell();
+        }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'PlaceBet') {
             body = beginCell().store(storePlaceBet(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'RevealSeed') {
             body = beginCell().store(storeRevealSeed(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SlashStake') {
+            body = beginCell().store(storeSlashStake(message)).endCell();
         }
         if (body === null) { throw new Error('Invalid message type'); }
         

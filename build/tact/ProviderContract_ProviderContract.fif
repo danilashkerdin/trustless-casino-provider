@@ -2,8 +2,6 @@
 PROGRAM{
   DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
-  DECLPROC $GameResult$_store
-  DECLPROC $GameResult$_store_cell
   DECLPROC $ProviderContract$_store
   DECLPROC $ProviderContract$_load
   DECLPROC $Context$_get_value
@@ -19,7 +17,6 @@ PROGRAM{
   DECLPROC $ProviderContract$_fun_getTotalGames
   DECLPROC $ProviderContract$_fun_getRtp
   DECLPROC $SendParameters$_constructor_to_value_body
-  DECLPROC $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce
   128972 DECLMETHOD %getStake
   91597 DECLMETHOD %getCommission
   70794 DECLMETHOD %getTotalCommission
@@ -37,40 +34,16 @@ PROGRAM{
   __tact_context_get_sender PROCINLINE:<{
     __tact_context_sender GETGLOB
   }>
-  $GameResult$_store PROCINLINE:<{
-    32 PUSHINT
-    s0 s9 XCHG2
-    32 STU
-    s1 s7 XCHG
-    32 STU
-    s1 s5 XCHG
-    1 STI
-    s1 s3 XCHG
-    16 STU
-    SWAP
-    STVARUINT16
-    SWAP
-    STVARUINT16
-    SWAP
-    STVARUINT16
-    STREF
-    64 STU
-  }>
-  $GameResult$_store_cell PROCINLINE:<{
-    8 -ROLL
-    $GameResult$_store INLINECALLDICT
-    ENDC
-  }>
   $ProviderContract$_store PROCINLINE:<{
-    s9 s10 XCHG2
+    s10 s11 XCHG2
     STSLICE
-    s1 s7 XCHG
+    s1 s8 XCHG
     16 STU
-    s0 s5 XCHG2
+    s0 s6 XCHG2
     STVARUINT16
-    s0 s3 XCHG2
+    s0 s4 XCHG2
     STVARUINT16
-    SWAP
+    ROT
     STVARUINT16
     SWAP
     STVARUINT16
@@ -82,6 +55,8 @@ PROGRAM{
     STVARUINT16
     s1 s2 XCHG
     8 STU
+    s1 s2 XCHG
+    256 STU
     STBREFR
   }>
   $ProviderContract$_load PROCINLINE:<{
@@ -98,14 +73,15 @@ PROGRAM{
     LDMSGADDR
     LDVARUINT16
     8 LDU
+    256 LDU
     DROP
-    s3 s10 XCHG
-    s3 s9 XCHG
-    s3 s8 XCHG
-    s3 s7 XCHG
-    s3 s6 XCHG
-    s3 s5 XCHG
-    s3 s4 XCHG
+    s4 s11 XCHG
+    s4 s10 XCHG
+    s4 s9 XCHG
+    s4 s8 XCHG
+    s4 s7 XCHG
+    s4 s6 XCHG
+    s4 s5 XCHG
   }>
   $Context$_get_value PROCINLINE:<{
     s1 s3 XCHG
@@ -121,8 +97,8 @@ PROGRAM{
     0 PUSHINT
     s0 s0 s0 PUSH3
     s0 s0 s0 PUSH3
-    s8 PUSH
-    -ROT
+    s0 s8 PUSH2
+    3 -ROLL
   }>
   $ProviderContract$_contract_load PROCINLINE:<{
     c4 PUSH
@@ -131,7 +107,7 @@ PROGRAM{
     SWAP
     IF:<{
       $ProviderContract$_load INLINECALLDICT
-      1 10 BLKDROP2
+      1 11 BLKDROP2
     }>ELSE<{
       $ProviderContract$init$_load INLINECALLDICT
       s0 s2 XCHG
@@ -145,7 +121,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    10 -ROLL
+    11 -ROLL
     $ProviderContract$_store INLINECALLDICT
     ENDC
     c4 POP
@@ -175,26 +151,26 @@ PROGRAM{
     INC
   }>
   $ProviderContract$_fun_getStake PROCREF:<{
-    s7 PUSH
-  }>
-  $ProviderContract$_fun_getCommission PROCREF:<{
     s8 PUSH
   }>
+  $ProviderContract$_fun_getCommission PROCREF:<{
+    s9 PUSH
+  }>
   $ProviderContract$_fun_getTotalCommission PROCREF:<{
-    s4 PUSH
+    s5 PUSH
   }>
   $ProviderContract$_fun_getTotalGames PROCREF:<{
-    s3 PUSH
+    s4 PUSH
   }>
   $ProviderContract$_fun_getRtp PROCREF:<{
-    s6 PUSH
+    s7 PUSH
     IFNOTJMP:<{
       0 PUSHINT
     }>
-    s5 PUSH
+    s6 PUSH
     10000 PUSHINT
     MUL
-    s7 PUSH
+    s8 PUSH
     DIV
   }>
   $SendParameters$_constructor_to_value_body PROCINLINE:<{
@@ -205,32 +181,30 @@ PROGRAM{
     s4 s2 XCHG2
     TRUE
   }>
-  $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce PROCINLINE:<{
-  }>
   %getStake PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getStake INLINECALLDICT
-    10 1 BLKDROP2
+    11 1 BLKDROP2
   }>
   %getCommission PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getCommission INLINECALLDICT
-    10 1 BLKDROP2
+    11 1 BLKDROP2
   }>
   %getTotalCommission PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getTotalCommission INLINECALLDICT
-    10 1 BLKDROP2
+    11 1 BLKDROP2
   }>
   %getTotalGames PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getTotalGames INLINECALLDICT
-    10 1 BLKDROP2
+    11 1 BLKDROP2
   }>
   %getRtp PROC:<{
     $ProviderContract$_contract_load INLINECALLDICT
     $ProviderContract$_fun_getRtp INLINECALLDICT
-    10 1 BLKDROP2
+    11 1 BLKDROP2
   }>
   recv_internal PROC:<{
     SWAP
@@ -248,11 +222,11 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $ProviderContract$_contract_load INLINECALLDICT
-    s0 s11 XCHG
+    s0 s12 XCHG
     IFJMP:<{
-      11 BLKDROP
+      12 BLKDROP
     }>
-    s0 s9 XCHG
+    s0 s10 XCHG
     32 LDUQ 130 THROWIFNOT
     OVER
     16 EQINT
@@ -260,15 +234,15 @@ PROGRAM{
       2DROP
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
-      s1 s6 XCHG
+      s1 s7 XCHG
       ADD
+      s8 s10 XCHG
       s7 s9 XCHG
-      s6 s8 XCHG
-      s0 s7 XCHG
+      s0 s8 XCHG
+      s5 s7 XCHG
       s4 s6 XCHG
       s3 s5 XCHG
       s4 s3 s0 XCHG3
-      s1 s2 XCHG
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
@@ -279,7 +253,7 @@ PROGRAM{
       DROP
       35499 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s10 PUSH
+      s11 PUSH
       SDEQ
       THROWANYIFNOT
       11977 PUSHINT
@@ -287,12 +261,12 @@ PROGRAM{
       0 GTINT
       THROWANYIFNOT
       21245 PUSHINT
-      s7 s1 PUSH2
+      s8 s1 PUSH2
       GEQ
       THROWANYIFNOT
-      s6 s6 XCPU
+      s7 s7 XCPU
       SUB
-      s8 s6 PUXC
+      s9 s7 PUXC
       PUSHNULL
       $SendParameters$_constructor_to_value_body INLINECALLDICT
           NEWC
@@ -361,21 +335,21 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
-      s7 s9 XCHG
-      2 7 BLKSWAP
+      s8 s10 XCHG
+      2 8 BLKSWAP
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
     18 EQINT
     IFJMP:<{
       NIP
-      s7 POP
-      s0 s6 XCHG
+      s8 POP
+      s0 s7 XCHG
       16 LDU
       DROP
       35499 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s9 PUSH
+      s10 PUSH
       SDEQ
       THROWANYIFNOT
       20824 PUSHINT
@@ -383,140 +357,39 @@ PROGRAM{
       10000 PUSHINT
       LEQ
       THROWANYIFNOT
-      s7 s9 XCHG
-      s0 s8 XCHG
+      s8 s10 XCHG
+      s0 s9 XCHG
+      s6 s8 XCHG
       s5 s7 XCHG
       s4 s6 XCHG
       s3 s5 XCHG
       s4 s0 s3 XCHG3
+      s0 s2 XCHG
       $ProviderContract$_contract_store INLINECALLDICT
     }>
     OVER
-    1 EQINT
+    19 EQINT
     IFJMP:<{
-      s11 POP
-      2DROP
-      s0 s8 XCHG
-      64 LDU
       NIP
-      8 LDU
+      LDVARUINT16
       DROP
-      11191 PUSHINT
-      s5 PUSH
-      0 GTINT
-      THROWANYIFNOT
-      62748 PUSHINT
-      OVER
-      0 GTINT
-      IF:<{
-        OVER
-        7 LESSINT
-      }>ELSE<{
-        FALSE
-      }>
-      THROWANYIFNOT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      56646 PUSHINT
-      OVER
-      0 GTINT
-      THROWANYIFNOT
-      8045 PUSHINT
-      s0 s9 XCHG
-      0 EQINT
-      s1 s9 XCHG
-      THROWANYIFNOT
+      35499 PUSHINT
       __tact_context_get_sender INLINECALLDICT
-      s4 s8 XCPU
-      ADD
-      s0 s9 XCHG
-      INC
-      s7 s9 XCHG
-      s6 s8 XCHG
-      s5 s7 XCHG
-      s5 s6 XCHG
-      s3 s5 XCHG
-      s4 s3 s3 XCHG3
-      $ProviderContract$_contract_store INLINECALLDICT
-    }>
-    SWAP
-    2 EQINT
-    IFJMP:<{
-      64 LDU
-      LDREF
-      8 LDU
-      NIP
-      LDREF
-      DROP
-      28115 PUSHINT
-      s9 PUSH
-      0 GTINT
+      s11 PUSH
+      SDEQ
       THROWANYIFNOT
-      27815 PUSHINT
-      s12 PUSH
-      0 GTINT
-      THROWANYIFNOT
+      11977 PUSHINT
       OVER
-          CTOS
-      SWAP
-          CTOS
-      s3 PUSH
-      $global_diceRoll INLINECALLDICT
-      s0 s12 PUXC
-      EQUAL
-      0 PUSHINT
-      s0 s0 s1 PUSH3
-      IF:<{
-        3 BLKDROP
-        s0 s11 XCHG
-        6 MULCONST
-        s0 s9 PUSH2
-        MUL
-        10000 PUSHINT
-        DIV
-        s0 s1 PUSH2
-        GREATER
-        IF:<{
-          DROP
-          DUP
-        }>
-        2DUP
-        SUB
-        21245 PUSHINT
-        s11 s1 PUSH2
-        GEQ
-        THROWANYIFNOT
-        s10 s10 XCPU
-        SUB
-        s8 s10 XCPU
-        ADD
-        s7 s1 XCPU
-        ADD
-        s10 s13 XCHG
-        s8 s10 XCHG
-        s0 s7 XCHG
-        s8 s8 s8 XCHG3
-      }>ELSE<{
-        s14 POP
-      }>
-      0 PUSHINT
-      s0 s3 PUSH2
-      IF:<{
-        60000 PUSHINT
-      }>ELSE<{
-        DUP
-      }>
-      s6 17 s() XCHG
-      s0 s4 XCHG
-      s3 s1 s3 XCHG3
-      16 s() PUSH
-      s0 s2 XCHG
-      s1 18 s() XCHG
-      s0 s8 XCHG
-      $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce INLINECALLDICT
-      NEWC
-      $GameResult$_store_cell INLINECALLDICT
-      s2 s10 s10 PUXC2
+      0 GTINT
+      THROWANYIFNOT
+      27584 PUSHINT
+      s5 s1 PUSH2
+      GEQ
+      THROWANYIFNOT
+      s4 s4 XCPU
+      SUB
+      s9 s4 PUXC
+      PUSHNULL
       $SendParameters$_constructor_to_value_body INLINECALLDICT
           NEWC
           b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
@@ -584,10 +457,361 @@ PROGRAM{
           // Group 5: Sending the message, with `mode` on top
           SWAP
           SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+      s8 s10 XCHG
       2 8 BLKSWAP
       $ProviderContract$_contract_store INLINECALLDICT
     }>
-    11 BLKDROP
+    OVER
+    1 EQINT
+    IFJMP:<{
+      NIP
+      s2 POP
+      s9 POP
+      s9 POP
+      s0 s8 XCHG
+      64 LDU
+      NIP
+      8 LDU
+      LDREF
+      NIP
+      256 LDU
+      DROP
+      11191 PUSHINT
+      s6 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      62748 PUSHINT
+      s2 PUSH
+      0 GTINT
+      IF:<{
+        s2 PUSH
+        7 LESSINT
+      }>ELSE<{
+        FALSE
+      }>
+      THROWANYIFNOT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      56646 PUSHINT
+      OVER
+      0 GTINT
+      THROWANYIFNOT
+      8045 PUSHINT
+      s0 s10 XCHG
+      0 EQINT
+      s1 s10 XCHG
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s5 s9 XCPU
+      ADD
+      s0 s10 XCHG
+      INC
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s6 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s4 s4 XCHG3
+      $ProviderContract$_contract_store INLINECALLDICT
+    }>
+    OVER
+    2 EQINT
+    IFJMP:<{
+      NIP
+      64 LDU
+      LDREF
+      SWAP
+      CTOS
+      SWAP
+      256 LDU
+      NIP
+      8 LDU
+      NIP
+      LDREF
+      DROP
+      28115 PUSHINT
+      s10 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      27815 PUSHINT
+      s4 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      OVER
+                  <{
+                      <{ DUP SREFS }> PUSHCONT
+                      <{ LDREFRTOS }> PUSHCONT
+                      WHILE
+                      DEPTH
+                      HASHEXT_SHA256
+                  }> PUSHCONT
+                  1 1 CALLXARGS
+      15371 PUSHINT
+      s0 s15 XCHG
+      EQUAL
+      s1 s14 XCHG
+      THROWANYIFNOT
+      s0 s12 XCHG
+          CTOS
+      s12 s1 s(-1) PU2XC
+      $global_diceRoll INLINECALLDICT
+      s0 s11 PUXC
+      EQUAL
+      0 PUSHINT
+      s0 s0 s1 PUSH3
+      IF:<{
+        3 BLKDROP
+        s0 s2 XCHG
+        6 MULCONST
+        s0 s9 PUSH2
+        MUL
+        10000 PUSHINT
+        DIV
+        s0 s1 PUSH2
+        GREATER
+        IF:<{
+          DROP
+          DUP
+        }>
+        2DUP
+        SUB
+        21245 PUSHINT
+        s11 s1 PUSH2
+        GEQ
+        THROWANYIFNOT
+        s10 s10 XCPU
+        SUB
+        s8 s10 XCPU
+        ADD
+        s7 s1 XCPU
+        ADD
+        s8 s10 XCHG
+        s0 s7 XCHG
+        s0 s8 XCHG
+        s4 s4 s4 XCHG3
+      }>ELSE<{
+        s5 POP
+      }>
+      0 PUSHINT
+      s0 s0 PUSH2
+          NEWC
+      s1 17 s() XCHG
+      32 STU
+      s5 s(-1) PUXC
+          1 STI
+      s0 s5 XCHG
+      IF:<{
+        60000 PUSHINT
+      }>ELSE<{
+        DUP
+      }>
+      s0 s5 XCHG2
+      16 STU
+      s0 s3 XCHG2
+          STVARUINT16
+      SWAP
+          STVARUINT16
+      s4 PUSH
+          STVARUINT16
+      s0 s14 XCHG2
+          STSLICER
+      s1 s2 XCHG
+      64 STU
+          ENDC
+      s3 s2 s2 PUXC2
+      $SendParameters$_constructor_to_value_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+          STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+          // → Stack state
+          // s0: Builder
+          // s1: `data`
+          // s2: `code`
+          // s3: `body`
+          // s4: `mode`
+          // Group 2: Placing the Builder after code and data, then checking those for nullability
+          s2 XCHG0
+          DUP2
+          ISNULL
+          SWAP
+          ISNULL
+          AND
+          // → Stack state
+          // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+          // s1: `code`
+          // s2: `data`
+          // s3: Builder
+          // s4: `body`
+          // s5: `mode`
+          // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+          <{
+              DROP2 // drop `data` and `code`, since either of those is null
+              b{0} STSLICECONST
+          }> PUSHCONT
+          // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+          <{
+              // _ split_depth:(Maybe (## 5))
+              //   special:(Maybe TickTock)
+              //   code:(Maybe ^Cell)
+              //   data:(Maybe ^Cell)
+              //   library:(Maybe ^Cell)
+              // = StateInit;
+              ROT                // place message Builder on top
+              b{10} STSLICECONST // store Maybe = true, Either = false
+              // Start composing inlined StateInit
+              b{00} STSLICECONST // store split_depth and special first
+              STDICT             // store code
+              STDICT             // store data
+              b{0} STSLICECONST  // store library
+          }> PUSHCONT
+          // Group 3: IFELSE that does the branching shown above
+          IFELSE
+          // → Stack state
+          // s0: Builder
+          // s1: null or StateInit
+          // s2: `body`
+          // s3: `mode`
+          // Group 4: Finalizing the message
+          STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+          ENDC
+          // → Stack state
+          // s0: Cell
+          // s1: `mode`
+          // Group 5: Sending the message, with `mode` on top
+          SWAP
+          SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s0 s3 XCHG3
+      $ProviderContract$_contract_store INLINECALLDICT
+    }>
+    SWAP
+    48 EQINT
+    IFJMP:<{
+      64 LDU
+      NIP
+      256 LDU
+      LDREF
+      SWAP
+      CTOS
+      SWAP
+      LDREF
+      NIP
+      LDVARUINT16
+      DROP
+      SWAP
+                  <{
+                      <{ DUP SREFS }> PUSHCONT
+                      <{ LDREFRTOS }> PUSHCONT
+                      WHILE
+                      DEPTH
+                      HASHEXT_SHA256
+                  }> PUSHCONT
+                  1 1 CALLXARGS
+      3006 PUSHINT
+      s0 s3 XCHG
+      NEQ
+      s1 s2 XCHG
+      THROWANYIFNOT
+      6 MULCONST
+      s0 s7 PUSH2
+      GREATER
+      IF:<{
+        DROP
+        s6 PUSH
+      }>
+      s7 s7 XCPU
+      SUB
+      s5 s7 XCPU
+      ADD
+      __tact_context_get_sender INLINECALLDICT
+      s0 s8 XCHG2
+      PUSHNULL
+      $SendParameters$_constructor_to_value_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+          STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+          // → Stack state
+          // s0: Builder
+          // s1: `data`
+          // s2: `code`
+          // s3: `body`
+          // s4: `mode`
+          // Group 2: Placing the Builder after code and data, then checking those for nullability
+          s2 XCHG0
+          DUP2
+          ISNULL
+          SWAP
+          ISNULL
+          AND
+          // → Stack state
+          // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+          // s1: `code`
+          // s2: `data`
+          // s3: Builder
+          // s4: `body`
+          // s5: `mode`
+          // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+          <{
+              DROP2 // drop `data` and `code`, since either of those is null
+              b{0} STSLICECONST
+          }> PUSHCONT
+          // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+          <{
+              // _ split_depth:(Maybe (## 5))
+              //   special:(Maybe TickTock)
+              //   code:(Maybe ^Cell)
+              //   data:(Maybe ^Cell)
+              //   library:(Maybe ^Cell)
+              // = StateInit;
+              ROT                // place message Builder on top
+              b{10} STSLICECONST // store Maybe = true, Either = false
+              // Start composing inlined StateInit
+              b{00} STSLICECONST // store split_depth and special first
+              STDICT             // store code
+              STDICT             // store data
+              b{0} STSLICECONST  // store library
+          }> PUSHCONT
+          // Group 3: IFELSE that does the branching shown above
+          IFELSE
+          // → Stack state
+          // s0: Builder
+          // s1: null or StateInit
+          // s2: `body`
+          // s3: `mode`
+          // Group 4: Finalizing the message
+          STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+          ENDC
+          // → Stack state
+          // s0: Cell
+          // s1: `mode`
+          // Group 5: Sending the message, with `mode` on top
+          SWAP
+          SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+      s8 s10 XCHG
+      s7 s9 XCHG
+      5 4 REVERSE
+      2 4 BLKSWAP
+      $ProviderContract$_contract_store INLINECALLDICT
+    }>
+    12 BLKDROP
     130 THROW
   }>
 }END>c

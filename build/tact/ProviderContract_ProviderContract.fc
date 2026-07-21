@@ -14,17 +14,11 @@
 ;; __tact_context_get_sender
 slice __tact_context_get_sender() inline;
 
-;; $GameResult$_store
-builder $GameResult$_store(builder build_0, (int, int, int, int, int, int, cell, int) v) inline;
-
-;; $GameResult$_store_cell
-cell $GameResult$_store_cell((int, int, int, int, int, int, cell, int) v, builder b) inline;
-
 ;; $ProviderContract$_store
-builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, int, int, slice, int, int) v) inline;
+builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, int, int, slice, int, int, int) v) inline;
 
 ;; $ProviderContract$_load
-(slice, ((slice, int, int, int, int, int, int, slice, int, int))) $ProviderContract$_load(slice sc_0) inline;
+(slice, ((slice, int, int, int, int, int, int, slice, int, int, int))) $ProviderContract$_load(slice sc_0) inline;
 
 ;; $Context$_get_value
 _ $Context$_get_value((int, slice, int, slice) v) inline;
@@ -33,13 +27,13 @@ _ $Context$_get_value((int, slice, int, slice) v) inline;
 (slice, ((slice, int))) $ProviderContract$init$_load(slice sc_0) inline;
 
 ;; $ProviderContract$_contract_init
-(slice, int, int, int, int, int, int, slice, int, int) $ProviderContract$_contract_init(slice $owner, int $commissionBps) impure inline;
+(slice, int, int, int, int, int, int, slice, int, int, int) $ProviderContract$_contract_init(slice $owner, int $commissionBps) impure inline;
 
 ;; $ProviderContract$_contract_load
-(slice, int, int, int, int, int, int, slice, int, int) $ProviderContract$_contract_load() impure inline;
+(slice, int, int, int, int, int, int, slice, int, int, int) $ProviderContract$_contract_load() impure inline;
 
 ;; $ProviderContract$_contract_store
-() $ProviderContract$_contract_store((slice, int, int, int, int, int, int, slice, int, int) v) impure inline;
+() $ProviderContract$_contract_store((slice, int, int, int, int, int, int, slice, int, int, int) v) impure inline;
 
 ;; $Cell$_fun_asSlice
 slice $Cell$_fun_asSlice(cell $self) impure inline;
@@ -48,25 +42,22 @@ slice $Cell$_fun_asSlice(cell $self) impure inline;
 int $global_diceRoll(slice $serverSeed, slice $clientSeed, int $nonce) impure inline_ref;
 
 ;; $ProviderContract$_fun_getStake
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getStake((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getStake((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref;
 
 ;; $ProviderContract$_fun_getCommission
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getCommission((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getCommission((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref;
 
 ;; $ProviderContract$_fun_getTotalCommission
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getTotalCommission((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getTotalCommission((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref;
 
 ;; $ProviderContract$_fun_getTotalGames
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getTotalGames((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getTotalGames((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref;
 
 ;; $ProviderContract$_fun_getRtp
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getRtp((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getRtp((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref;
 
 ;; $SendParameters$_constructor_to_value_body
 ((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_body(slice $to, int $value, cell $body) inline;
-
-;; $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce
-((int, int, int, int, int, int, cell, int)) $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce(int $outcome, int $win, int $multiplierBps, int $grossPayout, int $commissionTaken, int $netPayout, cell $serverSeed, int $nonce) inline;
 
 
 ;; ProviderContract_ProviderContract.stdlib.fc
@@ -192,6 +183,14 @@ builder $Builder$_fun_storeSlice(builder $self, slice $slice) impure asm """
     STSLICER
 """;
 
+builder $Builder$_fun_storeBit(int $value, builder $self) impure asm """
+    1 STI
+""";
+
+builder $Builder$_fun_storeCoins(builder $self, int $value) impure asm """
+    STVARUINT16
+""";
+
 ;; ProviderContract_ProviderContract.storage.fc
 ;;
 ;; Type: Context
@@ -213,40 +212,12 @@ _ $Context$_get_value((int, slice, int, slice) v) inline {
 }
 
 ;;
-;; Type: GameResult
-;; Header: 0x00000020
-;; TLB: game_result#00000020 outcome:uint32 win:bool multiplierBps:uint16 grossPayout:coins commissionTaken:coins netPayout:coins serverSeed:^cell nonce:uint64 = GameResult
-;;
-
-builder $GameResult$_store(builder build_0, (int, int, int, int, int, int, cell, int) v) inline {
-    var (v'outcome, v'win, v'multiplierBps, v'grossPayout, v'commissionTaken, v'netPayout, v'serverSeed, v'nonce) = v;
-    build_0 = store_uint(build_0, 32, 32);
-    build_0 = build_0.store_uint(v'outcome, 32);
-    build_0 = build_0.store_int(v'win, 1);
-    build_0 = build_0.store_uint(v'multiplierBps, 16);
-    build_0 = build_0.store_varuint16(v'grossPayout);
-    build_0 = build_0.store_varuint16(v'commissionTaken);
-    build_0 = build_0.store_varuint16(v'netPayout);
-    build_0 = build_0.store_ref(v'serverSeed);
-    build_0 = build_0.store_uint(v'nonce, 64);
-    return build_0;
-}
-
-cell $GameResult$_store_cell((int, int, int, int, int, int, cell, int) v, builder b) inline {
-    return $GameResult$_store(b, v).end_cell();
-}
-
-((int, int, int, int, int, int, cell, int)) $GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce(int $outcome, int $win, int $multiplierBps, int $grossPayout, int $commissionTaken, int $netPayout, cell $serverSeed, int $nonce) inline {
-    return ($outcome, $win, $multiplierBps, $grossPayout, $commissionTaken, $netPayout, $serverSeed, $nonce);
-}
-
-;;
 ;; Type: ProviderContract
-;; TLB: _ owner:address commissionBps:uint16 stake:coins totalBets:coins totalPayouts:coins totalCommission:coins gameCount:uint32 pendingSender:address pendingBetAmount:coins pendingGuess:uint8 = ProviderContract
+;; TLB: _ owner:address commissionBps:uint16 stake:coins totalBets:coins totalPayouts:coins totalCommission:coins gameCount:uint32 pendingSender:address pendingBetAmount:coins pendingGuess:uint8 pendingSeedHash:uint256 = ProviderContract
 ;;
 
-builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, int, int, slice, int, int) v) inline {
-    var (v'owner, v'commissionBps, v'stake, v'totalBets, v'totalPayouts, v'totalCommission, v'gameCount, v'pendingSender, v'pendingBetAmount, v'pendingGuess) = v;
+builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, int, int, slice, int, int, int) v) inline {
+    var (v'owner, v'commissionBps, v'stake, v'totalBets, v'totalPayouts, v'totalCommission, v'gameCount, v'pendingSender, v'pendingBetAmount, v'pendingGuess, v'pendingSeedHash) = v;
     build_0 = build_0.store_slice(v'owner);
     build_0 = build_0.store_uint(v'commissionBps, 16);
     build_0 = build_0.store_varuint16(v'stake);
@@ -258,11 +229,12 @@ builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, in
     build_1 = build_1.store_slice(v'pendingSender);
     build_1 = build_1.store_varuint16(v'pendingBetAmount);
     build_1 = build_1.store_uint(v'pendingGuess, 8);
+    build_1 = build_1.store_uint(v'pendingSeedHash, 256);
     build_0 = store_builder_ref(build_0, build_1);
     return build_0;
 }
 
-(slice, ((slice, int, int, int, int, int, int, slice, int, int))) $ProviderContract$_load(slice sc_0) inline {
+(slice, ((slice, int, int, int, int, int, int, slice, int, int, int))) $ProviderContract$_load(slice sc_0) inline {
     var v'owner = sc_0~load_msg_addr();
     var v'commissionBps = sc_0~load_uint(16);
     var v'stake = sc_0~load_varuint16();
@@ -274,7 +246,8 @@ builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, in
     var v'pendingSender = sc_1~load_msg_addr();
     var v'pendingBetAmount = sc_1~load_varuint16();
     var v'pendingGuess = sc_1~load_uint(8);
-    return (sc_0, (v'owner, v'commissionBps, v'stake, v'totalBets, v'totalPayouts, v'totalCommission, v'gameCount, v'pendingSender, v'pendingBetAmount, v'pendingGuess));
+    var v'pendingSeedHash = sc_1~load_uint(256);
+    return (sc_0, (v'owner, v'commissionBps, v'stake, v'totalBets, v'totalPayouts, v'totalCommission, v'gameCount, v'pendingSender, v'pendingBetAmount, v'pendingGuess, v'pendingSeedHash));
 }
 
 (slice, ((slice, int))) $ProviderContract$init$_load(slice sc_0) inline {
@@ -283,7 +256,7 @@ builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, in
     return (sc_0, (v'owner, v'commissionBps));
 }
 
-(slice, int, int, int, int, int, int, slice, int, int) $ProviderContract$_contract_load() impure inline {
+(slice, int, int, int, int, int, int, slice, int, int, int) $ProviderContract$_contract_load() impure inline {
     slice $sc = get_data().begin_parse();
     int $loaded = $sc~load_int(1);
     if ($loaded) {
@@ -296,7 +269,7 @@ builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, in
     }
 }
 
-() $ProviderContract$_contract_store((slice, int, int, int, int, int, int, slice, int, int) v) impure inline {
+() $ProviderContract$_contract_store((slice, int, int, int, int, int, int, slice, int, int, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_int(true, 1);
     b = $ProviderContract$_store(b, v);
@@ -307,50 +280,50 @@ builder $ProviderContract$_store(builder build_0, (slice, int, int, int, int, in
 ;; Contract ProviderContract functions
 ;;
 
-(slice, int, int, int, int, int, int, slice, int, int) $ProviderContract$_contract_init(slice $owner, int $commissionBps) impure inline {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = (null(), 100, 0, 0, 0, 0, 0, null(), 0, 0);
+(slice, int, int, int, int, int, int, slice, int, int, int) $ProviderContract$_contract_init(slice $owner, int $commissionBps) impure inline {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = (null(), 100, 0, 0, 0, 0, 0, null(), 0, 0, 0);
     $self'owner = $owner;
     $self'commissionBps = $commissionBps;
     $self'pendingSender = $owner;
-    return ($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess);
+    return ($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash);
 }
 
 int $global_diceRoll(slice $serverSeed, slice $clientSeed, int $nonce) impure inline_ref {
     return ((__tact_sha256($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint($Builder$_fun_storeSlice($Builder$_fun_storeSlice($global_beginCell(), $serverSeed), $clientSeed), $nonce, 64)))) % 6) + 1);
 }
 
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getStake((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = $self;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getStake((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = $self;
     var $fresh$ret_0 = $self'stake;
-    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_0);
+    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_0);
 }
 
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getCommission((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = $self;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getCommission((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = $self;
     var $fresh$ret_1 = $self'commissionBps;
-    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_1);
+    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_1);
 }
 
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getTotalCommission((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = $self;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getTotalCommission((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = $self;
     var $fresh$ret_2 = $self'totalCommission;
-    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_2);
+    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_2);
 }
 
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getTotalGames((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = $self;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getTotalGames((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = $self;
     var $fresh$ret_3 = $self'gameCount;
-    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_3);
+    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_3);
 }
 
-((slice, int, int, int, int, int, int, slice, int, int), int) $ProviderContract$_fun_getRtp((slice, int, int, int, int, int, int, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess)) = $self;
+((slice, int, int, int, int, int, int, slice, int, int, int), int) $ProviderContract$_fun_getRtp((slice, int, int, int, int, int, int, slice, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash)) = $self;
     ifnot ($self'totalBets) {
         var $fresh$ret_4 = 0;
-        return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_4);
+        return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_4);
     }
     var $fresh$ret_5 = (($self'totalPayouts * 10000) / $self'totalBets);
-    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess), $fresh$ret_5);
+    return (($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash), $fresh$ret_5);
 }
 
 ;;
@@ -407,7 +380,7 @@ _ %getRtp() method_id(110578) {
     __tact_context_sender = msg_sender_addr;
     
     ;; Load contract data
-    var ($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess) = $ProviderContract$_contract_load();
+    var ($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash) = $ProviderContract$_contract_load();
     
     ;; Handle bounced messages
     if (msg_bounced) { return (); }
@@ -416,7 +389,7 @@ _ %getRtp() method_id(110578) {
     if (op == 0x10) {
         var $msg = empty_tuple();
         $self'stake = ($self'stake + $Context$_get_value(__tact_context_get()));
-        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
         return ();
     }
     
@@ -428,7 +401,7 @@ _ %getRtp() method_id(110578) {
         throw_unless(21245, ($self'stake >= $msg'amount));
         $self'stake = ($self'stake - $msg'amount);
         $global_send($SendParameters$_constructor_to_value_body($self'owner, $msg'amount, null()));
-        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
         return ();
     }
     
@@ -438,7 +411,19 @@ _ %getRtp() method_id(110578) {
         throw_unless(35499, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
         throw_unless(20824, ($msg'commissionBps <= 10000));
         $self'commissionBps = $msg'commissionBps;
-        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
+        return ();
+    }
+    
+    ;; Receive WithdrawCommission message
+    if (op == 0x13) {
+        var $msg'amount = in_msg~load_varuint16();
+        throw_unless(35499, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+        throw_unless(11977, ($msg'amount > 0));
+        throw_unless(27584, ($self'totalCommission >= $msg'amount));
+        $self'totalCommission = ($self'totalCommission - $msg'amount);
+        $global_send($SendParameters$_constructor_to_value_body($self'owner, $msg'amount, null()));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
         return ();
     }
     
@@ -447,7 +432,7 @@ _ %getRtp() method_id(110578) {
         var $msg'nonce = in_msg~load_uint(64);
         var $msg'guess = in_msg~load_uint(8);
         var $msg'clientSeed = in_msg~load_ref();
-        var $msg'serverSeedHash = in_msg~load_ref();
+        var $msg'serverSeedHash = in_msg~load_uint(256);
         throw_unless(11191, ($self'stake > 0));
         throw_unless(62748, ( (($msg'guess >= 1)) ? (($msg'guess <= 6)) : (false) ));
         int $betValue = $Context$_get_value(__tact_context_get());
@@ -456,21 +441,25 @@ _ %getRtp() method_id(110578) {
         $self'pendingSender = __tact_context_get_sender();
         $self'pendingBetAmount = $betValue;
         $self'pendingGuess = $msg'guess;
+        $self'pendingSeedHash = $msg'serverSeedHash;
         $self'totalBets = ($self'totalBets + $betValue);
         $self'gameCount = ($self'gameCount + 1);
-        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
         return ();
     }
     
     ;; Receive RevealSeed message
     if (op == 0x2) {
         var $msg'nonce = in_msg~load_uint(64);
-        var $msg'serverSeed = in_msg~load_ref();
+        var $msg'serverSeed = in_msg~load_ref().begin_parse();
+        var $msg'serverSeedHash = in_msg~load_uint(256);
         var $msg'guess = in_msg~load_uint(8);
         var $msg'clientSeed = in_msg~load_ref();
         throw_unless(28115, ($self'stake > 0));
         throw_unless(27815, ($self'pendingBetAmount > 0));
-        int $roll = $global_diceRoll($Cell$_fun_beginParse($msg'serverSeed), $Cell$_fun_beginParse($msg'clientSeed), $msg'nonce);
+        int $computedHash = __tact_sha256($msg'serverSeed);
+        throw_unless(15371, ($computedHash == $self'pendingSeedHash));
+        int $roll = $global_diceRoll($msg'serverSeed, $Cell$_fun_beginParse($msg'clientSeed), $msg'nonce);
         int $win = ($roll == $self'pendingGuess);
         int $grossPayout = 0;
         int $commissionTaken = 0;
@@ -489,8 +478,31 @@ _ %getRtp() method_id(110578) {
         }
         $self'pendingBetAmount = 0;
         $self'pendingGuess = 0;
-        $global_send($SendParameters$_constructor_to_value_body($self'pendingSender, $netPayout, $GameResult$_store_cell($GameResult$_constructor_outcome_win_multiplierBps_grossPayout_commissionTaken_netPayout_serverSeed_nonce($roll, $win, ($win ? 60000 : 0), $grossPayout, $commissionTaken, $netPayout, $msg'serverSeed, $msg'nonce), begin_cell())));
-        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess));
+        $self'pendingSeedHash = 0;
+        cell $replyBody = $Builder$_fun_endCell(store_uint($Builder$_fun_storeSlice($Builder$_fun_storeCoins($Builder$_fun_storeCoins($Builder$_fun_storeCoins(store_uint($Builder$_fun_storeBit($win, store_uint($global_beginCell(), $roll, 32)), ($win ? 60000 : 0), 16), $grossPayout), $commissionTaken), $netPayout), $msg'serverSeed), $msg'nonce, 64));
+        $global_send($SendParameters$_constructor_to_value_body($self'pendingSender, $netPayout, $replyBody));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
+        return ();
+    }
+    
+    ;; Receive SlashStake message
+    if (op == 0x30) {
+        var $msg'nonce = in_msg~load_uint(64);
+        var $msg'expectedHash = in_msg~load_uint(256);
+        var $msg'actualServerSeed = in_msg~load_ref().begin_parse();
+        var $msg'clientSeed = in_msg~load_ref();
+        var $msg'betAmount = in_msg~load_varuint16();
+        var $msg'guess = in_msg~load_uint(8);
+        int $computedHash = __tact_sha256($msg'actualServerSeed);
+        throw_unless(3006, ($computedHash != $msg'expectedHash));
+        int $owed = ($msg'betAmount * 6);
+        if (($owed > $self'stake)) {
+            $owed = $self'stake;
+        }
+        $self'stake = ($self'stake - $owed);
+        $self'totalPayouts = ($self'totalPayouts + $owed);
+        $global_send($SendParameters$_constructor_to_value_body(__tact_context_get_sender(), $owed, null()));
+        $ProviderContract$_contract_store(($self'owner, $self'commissionBps, $self'stake, $self'totalBets, $self'totalPayouts, $self'totalCommission, $self'gameCount, $self'pendingSender, $self'pendingBetAmount, $self'pendingGuess, $self'pendingSeedHash));
         return ();
     }
     

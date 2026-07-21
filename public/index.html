@@ -583,43 +583,69 @@
       }, 3200);
     });
 
-    // ===== DICE =====
+    // ===== DICE (ON-CHAIN) =====
     let dSelected = null;
     document.querySelectorAll('#diceGuess .g').forEach(g => {
       g.addEventListener('click', () => {
         document.querySelectorAll('#diceGuess .g').forEach(x => x.classList.remove('active'));
         g.classList.add('active'); dSelected = parseInt(g.dataset.val);
-        const prob = ({2:1,3:2,4:3,5:4,6:5,7:6,8:5,9:4,10:3,11:2,12:1})[dSelected]||0;
-        $('dPayout').textContent = (36/prob).toFixed(1)+'x';
+        $('dPayout').textContent = '6x';
       });
     });
     $('dRoll').addEventListener('click', async () => {
-      if (!dSelected) { showResult($('dResult'),'info','Pick a number first'); return; }
+      if (!dSelected) { showResult($('dResult'),'info','Pick a number (1-6)'); return; }
+      if (!wallet) { showResult($('dResult'),'info','Connect wallet first'); return; }
       const bet = parseFloat($('dBet').value);
       if (!bet||bet<=0) return;
       hideResult($('dResult'));
       $('dRoll').disabled = true;
       document.querySelectorAll('#diceGuess .g').forEach(x => x.classList.remove('win','lose'));
-      const d1 = $('dice1'), d2 = $('dice2');
-      d1.classList.add('roll'); d2.classList.add('roll');
-      const serverSeed = randomHex(32), serverSeedHash = await sha256(serverSeed);
-      const clientSeed = randomHex(32), nonce = Math.floor(Math.random()*1000000);
-      const outcome = await computeOutcome(serverSeed, clientSeed, nonce);
-      const roll1 = (outcome % 6) + 1, roll2 = (Math.floor(outcome/6) % 6) + 1;
-      const sum = roll1 + roll2;
-      setTimeout(() => {
-        d1.classList.remove('roll'); d2.classList.remove('roll');
-        const faces = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
-        d1.textContent = faces[roll1]; d2.textContent = faces[roll2];
-        const prob = ({2:1,3:2,4:3,5:4,6:5,7:6,8:5,9:4,10:3,11:2,12:1})[dSelected]||0;
-        const mult = 36/prob;
-        const win = sum === dSelected;
-        const gEl = document.querySelector(`#diceGuess .g[data-val="${sum}"]`);
-        if (gEl) gEl.classList.add(win?'win':'lose');
-        if (win) showResult($('dResult'),'win',`🎉 ${roll1}+${roll2}=${sum} — WIN ${mult.toFixed(1)}x = ${(bet*mult).toFixed(2)} TON`);
-        else showResult($('dResult'),'lose',`😢 ${roll1}+${roll2}=${sum} — Lost ${bet.toFixed(2)} TON`);
-        $('dRoll').disabled = false;
-      }, 600);
+      $('dice1').classList.add('roll'); $('dice2').classList.add('roll');
+
+      try {
+        // 1. Get server seed from provider
+        const initRes = await fetch('/api/init-game', { method: 'POST' }).then(r=>r.json());
+        if (!initRes.ok) throw new Error(initRes.error);
+        const { serverSeed, serverSeedHash } = initRes;
+        const clientSeed = randomHex(32);
+        const nonce = Math.floor(Math.random()*1000000) + 1;
+
+        // 2. Build PlaceBet payload via provider API
+        const payloadRes = await fetch('/api/build-bet-payload', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ nonce, guess: dSelected, clientSeed, serverSeedHash }),
+        }).then(r=>r.json());
+        if (!payloadRes.ok) throw new Error(payloadRes.error);
+
+        // 3. Send transaction via TonConnect
+        const betAmount = Math.max(bet, 0.05);
+        const tx = {
+          validUntil: Math.floor(Date.now()/1000) + 300,
+          messages: [{
+            address: CONTRACT.provider,
+            amount: (betAmount * 1e9).toString(),
+            payload: payloadRes.payload,
+          }]
+        };
+        const txResult = await tonConnectUI.sendTransaction(tx);
+
+        // 4. Reveal on provider backend
+        const revealRes = await fetch('/api/reveal', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ nonce, serverSeed, serverSeedHash, guess: dSelected, clientSeed }),
+        }).then(r=>r.json());
+
+        // 5. Show result
+        showResult($('dResult'),'win',`🎉 Done! <a href="https://testnet.tonviewer.com/${txResult.transactionHash}">View tx</a>`);
+
+      } catch(e) {
+        showResult($('dResult'),'lose',`❌ ${e.message}`);
+      }
+
+      $('dice1').classList.remove('roll'); $('dice2').classList.remove('roll');
+      $('dRoll').disabled = false;
     });
 
     // ===== CRASH =====

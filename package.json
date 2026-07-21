@@ -5,6 +5,7 @@
   "description": "Trustless casino provider on TON with provably fair mechanism, slashing, and verification",
   "scripts": {
     "build": "tsc",
+    "start": "node dist/server/src/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "server": "ts-node server/src/index.ts",
